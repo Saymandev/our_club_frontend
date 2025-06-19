@@ -1,4 +1,4 @@
-import { authApi, bloodDonationApi } from '@/services/api'
+import api, { authApi } from '@/services/api'
 import { useAuthStore } from '@/store/authStore'
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -42,44 +42,49 @@ const RegisterPage: React.FC = () => {
     try {
       setLoading(true)
       
-      // Step 1: Register the user
-      await authApi.register({
+      // Prepare registration data
+      const registrationData: any = {
         username: formData.username,
         email: formData.email,
         password: formData.password,
         role: formData.role
-      })
-
-      toast.success(t('bloodDonation.register.registrationSuccessful'))
-
-      // Step 2: Login the user
-      await authApi.login({
-        email: formData.email,
-        password: formData.password
-      })
-
-      // Step 3: Add blood donation info if provided
-      if (formData.wantsToDonate && formData.bloodGroup && formData.contactNumber) {
-        try {
-          await bloodDonationApi.updateBloodInfo({
-            bloodGroup: formData.bloodGroup,
-            contactNumber: formData.contactNumber
-          })
-          toast.success(t('bloodDonation.register.bloodInfoAdded'))
-        } catch (bloodError) {
-          console.error('Blood info error:', bloodError)
-          toast.error(t('bloodDonation.register.bloodInfoFailed'))
-        }
       }
 
-      // Update auth state
-      authLogin(formData.email, formData.password)
-      
-      // Redirect to appropriate page
-      if (formData.wantsToDonate) {
-        navigate('/my-blood-donation')
+      // Add blood donation info if provided
+      if (formData.wantsToDonate && formData.bloodGroup && formData.contactNumber) {
+        registrationData.bloodGroup = formData.bloodGroup
+        registrationData.contactNumber = formData.contactNumber
+      }
+
+      // Register user with all information in one step
+      const registerResponse = await authApi.register(registrationData)
+
+      if (registerResponse.data.success) {
+        toast.success(t('bloodDonation.register.registrationSuccessful'))
+        
+        if (formData.wantsToDonate) {
+          toast.success(t('bloodDonation.register.bloodInfoAdded'))
+        }
+
+        // Update Zustand auth state with the registration response
+        const { user, token } = registerResponse.data
+        if (token) {
+          api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+        }
+
+        // Use the auth store's login function to properly set the state
+        const loginSuccess = await authLogin(formData.email, formData.password)
+        
+        if (loginSuccess) {
+          // Redirect to appropriate page
+          if (formData.wantsToDonate) {
+            navigate('/my-blood-donation')
+          } else {
+            navigate('/')
+          }
+        }
       } else {
-        navigate('/')
+        toast.error(registerResponse.data.message || t('bloodDonation.register.registrationFailed'))
       }
 
     } catch (error: any) {
