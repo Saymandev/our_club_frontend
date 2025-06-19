@@ -34,8 +34,6 @@ const BloodDonorsPage: React.FC = () => {
   const fetchDonors = async () => {
     try {
       setLoading(true)
-      console.log('Fetching donors with filters:', filters)
-      console.log('API Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:5001/api')
       
       const response = await bloodDonationApi.getAllDonors(filters)
       console.log('Donors response:', response.data)
