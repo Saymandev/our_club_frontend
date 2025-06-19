@@ -67,7 +67,7 @@ const RegisterPage: React.FC = () => {
         }
 
         // Update Zustand auth state with the registration response
-        const { user, token } = registerResponse.data
+        const { token } = registerResponse.data
         if (token) {
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`
         }
