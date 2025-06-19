@@ -1,0 +1,53 @@
+import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { useAuthStore } from '@/store/authStore'
+import { ReactNode } from 'react'
+import { Navigate, useLocation } from 'react-router-dom'
+
+interface ProtectedRouteProps {
+  children: ReactNode
+  requiredRole?: 'admin' | 'moderator'
+}
+
+const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
+  const { isAuthenticated, isLoading, user } = useAuthStore()
+  const location = useLocation()
+
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
+
+  // Check role-based access
+  if (requiredRole && user?.role !== requiredRole) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">403</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Access Denied</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            You don't have permission to access this page.
+          </p>
+          <a
+            href="/"
+            className="btn-primary"
+          >
+            Go Home
+          </a>
+        </div>
+      </div>
+    )
+  }
+
+  return <>{children}</>
+}
+
+export default ProtectedRoute 
