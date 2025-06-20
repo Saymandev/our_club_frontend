@@ -125,21 +125,28 @@ export const uploadApi = {
     const formData = new FormData()
     formData.append('file', file)
     if (folder) formData.append('folder', folder)
+    
+    // Use longer timeout for uploads (2 minutes for video files)
     return api.post('/upload/single', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000, // 2 minutes
     })
   },
   multiple: (files: File[], folder?: string) => {
     const formData = new FormData()
     files.forEach(file => formData.append('files', file))
     if (folder) formData.append('folder', folder)
+    
+    // Use longer timeout for uploads (3 minutes for multiple files)
     return api.post('/upload/multiple', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 180000, // 3 minutes
     })
   },
   uploadSingle: (formData: FormData) => {
     return api.post('/upload/single', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000, // 2 minutes
     })
   }
 }

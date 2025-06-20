@@ -100,6 +100,12 @@ const AdminHistoricalMoments = () => {
       }
     }
 
+    // Check if there are video files and warn about longer upload time
+    const hasVideos = Array.from(files).some(file => file.type.startsWith('video/'))
+    if (hasVideos) {
+      toast.loading('Video files detected. Upload may take longer...', { duration: 3000 })
+    }
+
     try {
       setUploading(true)
       const uploadPromises = []
@@ -111,18 +117,67 @@ const AdminHistoricalMoments = () => {
 
       const responses = await Promise.all(uploadPromises)
       
-      const newFiles: MediaFile[] = responses.map((response) => ({
-        mediaType: response.data.data.resourceType,
-        mediaUrl: response.data.data.url,
-        publicId: response.data.data.publicId,
-        thumbnailUrl: response.data.data.thumbnailUrl || response.data.data.url
-      }))
+      // Debug log the responses
+      console.log('Upload responses:', responses)
+      
+      const newFiles: MediaFile[] = responses.map((response, index) => {
+        console.log(`Processing file ${index + 1}:`, response.data)
+        
+        // Validate response structure
+        if (!response.data || !response.data.data) {
+          throw new Error(`Invalid response structure for file ${index + 1}`)
+        }
+        
+        const data = response.data.data
+        
+        // Validate required fields
+        if (!data.url || !data.publicId) {
+          throw new Error(`Missing required fields in response for file ${index + 1}`)
+        }
+        
+        // Determine media type - fallback to file type if resourceType is missing
+        let mediaType = data.resourceType
+        if (!mediaType) {
+          const file = files[index]
+          mediaType = file.type.startsWith('video/') ? 'video' : 'image'
+        }
+        
+        return {
+          mediaType: mediaType as 'image' | 'video',
+          mediaUrl: data.url,
+          publicId: data.publicId,
+          thumbnailUrl: data.thumbnailUrl || data.url
+        }
+      })
 
       setUploadedFiles(prev => [...prev, ...newFiles])
       toast.success(`${files.length} file(s) uploaded successfully!`)
+      
+      // Clear the input value to allow re-uploading the same files
+      if (event.target) {
+        event.target.value = ''
+      }
     } catch (error: any) {
-      console.error('Upload error:', error)
-      toast.error(error?.response?.data?.message || 'Failed to upload files')
+      console.error('Upload error details:', error)
+      
+      // More detailed error messaging with specific handling for different error types
+      let errorMessage = 'Failed to upload files'
+      
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        errorMessage = 'Upload timed out. This can happen with large video files. Please try uploading smaller files or check your internet connection.'
+      } else if (error.response?.status === 413) {
+        errorMessage = 'File too large. Please reduce file size and try again.'
+      } else if (error.response?.status === 500) {
+        errorMessage = 'Server error during upload. Please try again later.'
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error.message) {
+        errorMessage = error.message
+      } else if (typeof error === 'string') {
+        errorMessage = error
+      }
+      
+      toast.error(errorMessage)
     } finally {
       setUploading(false)
     }
@@ -155,26 +210,52 @@ const AdminHistoricalMoments = () => {
         const existingMediaFiles = editingMoment.mediaFiles || []
         const newMediaFiles = uploadedFiles || []
         payload.mediaFiles = [...existingMediaFiles, ...newMediaFiles]
+        
+        console.log('Editing payload:', payload)
       } else {
         // When creating new moment
         if (uploadedFiles.length > 0) {
+          // Validate first file
+          const firstFile = uploadedFiles[0]
+          if (!firstFile.mediaType || !firstFile.mediaUrl || !firstFile.publicId) {
+            throw new Error('Invalid file data: missing required fields')
+          }
+          
           // First file as main media
-          payload.mediaType = uploadedFiles[0].mediaType
-          payload.mediaUrl = uploadedFiles[0].mediaUrl
-          payload.publicId = uploadedFiles[0].publicId
-          payload.thumbnailUrl = uploadedFiles[0].thumbnailUrl
+          payload.mediaType = firstFile.mediaType
+          payload.mediaUrl = firstFile.mediaUrl
+          payload.publicId = firstFile.publicId
+          payload.thumbnailUrl = firstFile.thumbnailUrl
           
           // Additional files in mediaFiles array
           const additionalFiles = uploadedFiles.length > 1 ? uploadedFiles.slice(1) : []
           payload.mediaFiles = additionalFiles
+          
+          console.log('Creating new moment payload:', payload)
+          console.log('Uploaded files:', uploadedFiles)
+        } else {
+          throw new Error('No files were uploaded')
         }
       }
 
+      // Validate payload before sending
+      if (!payload.title || !payload.description || !payload.date) {
+        throw new Error('Missing required fields: title, description, or date')
+      }
+
+      if (!editingMoment && (!payload.mediaType || !payload.mediaUrl || !payload.publicId)) {
+        throw new Error('Missing required media fields')
+      }
+
+      console.log('Final payload being sent:', JSON.stringify(payload, null, 2))
+
       if (editingMoment) {
-        await historicalMomentsApi.update(editingMoment._id, payload)
+        const response = await historicalMomentsApi.update(editingMoment._id, payload)
+        console.log('Update response:', response)
         toast.success('Historical moment updated successfully!')
       } else {
-        await historicalMomentsApi.create(payload)
+        const response = await historicalMomentsApi.create(payload)
+        console.log('Create response:', response)
         toast.success('Historical moment created successfully!')
       }
 
@@ -184,8 +265,24 @@ const AdminHistoricalMoments = () => {
       reset()
       fetchMoments()
     } catch (error: any) {
-      console.error('Error saving moment:', error)
-      toast.error(error?.response?.data?.message || 'Failed to save historical moment')
+      console.error('Error saving moment - Full error object:', error)
+      console.error('Error response:', error?.response)
+      console.error('Error response data:', error?.response?.data)
+      
+      // More detailed error messaging
+      let errorMessage = 'Failed to save historical moment'
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error?.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        // Handle validation errors
+        const validationErrors = error.response.data.errors.map((err: any) => err.msg || err.message).join(', ')
+        errorMessage = `Validation failed: ${validationErrors}`
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
+      toast.error(errorMessage)
     }
   }
 
@@ -241,7 +338,7 @@ const AdminHistoricalMoments = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="flex items-center justify-between"
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
       >
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -251,7 +348,7 @@ const AdminHistoricalMoments = () => {
             Manage club memories and historical moments
           </p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex space-x-3 w-full sm:w-auto">
           <button 
             onClick={() => {
               setEditingMoment(null)
@@ -259,7 +356,7 @@ const AdminHistoricalMoments = () => {
               reset()
               setShowModal(true)
             }}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center space-x-2"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center space-x-2 w-full sm:w-auto justify-center"
           >
             <Plus className="w-4 h-4" />
             <span>Add Moment</span>
@@ -331,6 +428,15 @@ const AdminHistoricalMoments = () => {
                       src={moment.mediaUrl}
                       className="w-full h-48 object-cover"
                       controls
+                      preload="metadata"
+                      muted
+                      playsInline
+                      poster={moment.thumbnailUrl}
+                      onError={(e) => {
+                        console.error('Video failed to load:', e)
+                        console.log('Video URL:', moment.mediaUrl)
+                        console.log('Thumbnail URL:', moment.thumbnailUrl)
+                      }}
                     />
                   )}
                   
@@ -430,9 +536,9 @@ const AdminHistoricalMoments = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4"
           >
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
                 {editingMoment ? 'Edit Historical Moment' : 'Add New Historical Moment'}
               </h2>
@@ -466,7 +572,12 @@ const AdminHistoricalMoments = () => {
                         {uploading && (
                           <div className="flex items-center justify-center mt-4">
                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
-                            <span className="ml-2 text-sm text-gray-500">Uploading...</span>
+                            <span className="ml-2 text-sm text-gray-500">
+                              {uploadedFiles.length > 0 ? 
+                                `Uploading files... This may take a few minutes for videos.` : 
+                                'Uploading...'
+                              }
+                            </span>
                           </div>
                         )}
                       </div>
@@ -492,6 +603,9 @@ const AdminHistoricalMoments = () => {
                                   src={file.mediaUrl} 
                                   className="w-full h-24 object-cover rounded-lg" 
                                   muted 
+                                  preload="metadata"
+                                  playsInline
+                                  poster={file.thumbnailUrl}
                                 />
                               )}
                               <button
@@ -526,7 +640,14 @@ const AdminHistoricalMoments = () => {
                         {editingMoment.mediaType === 'image' ? (
                           <img src={editingMoment.mediaUrl} alt={editingMoment.title} className="w-full h-24 object-cover rounded-lg" />
                         ) : (
-                          <video src={editingMoment.mediaUrl} className="w-full h-24 object-cover rounded-lg" muted />
+                          <video 
+                            src={editingMoment.mediaUrl} 
+                            className="w-full h-24 object-cover rounded-lg" 
+                            muted 
+                            preload="metadata"
+                            playsInline
+                            poster={editingMoment.thumbnailUrl}
+                          />
                         )}
                         <div className="absolute bottom-1 left-1 bg-blue-500 text-white px-2 py-1 rounded text-xs">
                           Main
@@ -539,7 +660,14 @@ const AdminHistoricalMoments = () => {
                           {file.mediaType === 'image' ? (
                             <img src={file.mediaUrl} alt={`Additional ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
                           ) : (
-                            <video src={file.mediaUrl} className="w-full h-24 object-cover rounded-lg" muted />
+                            <video 
+                              src={file.mediaUrl} 
+                              className="w-full h-24 object-cover rounded-lg" 
+                              muted 
+                              preload="metadata"
+                              playsInline
+                              poster={file.thumbnailUrl}
+                            />
                           )}
                         </div>
                       ))}
@@ -566,7 +694,9 @@ const AdminHistoricalMoments = () => {
                           {uploading && (
                             <div className="flex items-center justify-center mt-2">
                               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
-                              <span className="ml-2 text-sm text-gray-500">Uploading...</span>
+                              <span className="ml-2 text-sm text-gray-500">
+                                Uploading additional files... Please wait for video uploads.
+                              </span>
                             </div>
                           )}
                         </div>
@@ -592,6 +722,9 @@ const AdminHistoricalMoments = () => {
                                     src={file.mediaUrl} 
                                     className="w-full h-24 object-cover rounded-lg" 
                                     muted 
+                                    preload="metadata"
+                                    playsInline
+                                    poster={file.thumbnailUrl}
                                   />
                                 )}
                                 <button
@@ -639,7 +772,7 @@ const AdminHistoricalMoments = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Date *
@@ -679,7 +812,7 @@ const AdminHistoricalMoments = () => {
                   />
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4">
+                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
                   <button
                     type="button"
                     onClick={() => {
@@ -688,7 +821,7 @@ const AdminHistoricalMoments = () => {
                       setUploadedFiles([])
                       reset()
                     }}
-                    className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                   >
                     Cancel
                   </button>

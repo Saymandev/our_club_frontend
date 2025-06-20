@@ -331,8 +331,20 @@ const HistoricalMomentDetailPage = () => {
                 <video
                   src={mediaFiles[currentImageIndex].mediaUrl}
                   controls
-                  className="absolute inset-0 w-full h-full object-cover object-center"
+                  className="absolute inset-0 w-full h-full object-cover object-center z-10 cursor-pointer"
                   poster={mediaFiles[currentImageIndex].thumbnailUrl}
+                  preload="metadata"
+                  playsInline
+                  style={{ pointerEvents: 'auto' }}
+                  onError={(e) => {
+                    console.error('Video failed to load:', e)
+                    console.log('Video URL:', mediaFiles[currentImageIndex].mediaUrl)
+                    console.log('Thumbnail URL:', mediaFiles[currentImageIndex].thumbnailUrl)
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    // Let the video handle its own click events
+                  }}
                 />
               ) : (
                 <img
@@ -352,13 +364,13 @@ const HistoricalMomentDetailPage = () => {
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors backdrop-blur-sm"
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors backdrop-blur-sm z-20"
                   >
                     <ChevronLeft className="w-6 h-6" />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors backdrop-blur-sm"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors backdrop-blur-sm z-20"
                   >
                     <ChevronRight className="w-6 h-6" />
                   </button>
@@ -369,7 +381,7 @@ const HistoricalMomentDetailPage = () => {
               {mediaFiles[currentImageIndex].mediaType === 'image' && (
                 <button
                   onClick={() => openLightbox(currentImageIndex)}
-                  className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors backdrop-blur-sm"
+                  className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors backdrop-blur-sm z-20"
                 >
                   <ZoomIn className="w-5 h-5" />
                 </button>
@@ -379,8 +391,8 @@ const HistoricalMomentDetailPage = () => {
         </div>
         
         {/* Overlay Content */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8 pointer-events-none">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
