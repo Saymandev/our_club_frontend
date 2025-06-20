@@ -20,7 +20,7 @@ const HistoricalMomentDetailPage = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { language } = useLanguageStore()
-  const { user, isAuthenticated } = useAuthStore()
+  const {  isAuthenticated } = useAuthStore()
   const [moment, setMoment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
