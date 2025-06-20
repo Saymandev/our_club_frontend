@@ -1,22 +1,34 @@
 import LoadingSpinner from '@/components/UI/LoadingSpinner'
 import { historicalMomentsApi } from '@/services/api'
+import { useAuthStore } from '@/store/authStore'
 import { useLanguageStore } from '@/store/languageStore'
-import { motion } from 'framer-motion'
-import { ArrowLeft, Calendar, Camera, Clock, Eye, Hash, Star, Users } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowLeft, Calendar, Camera, ChevronLeft, ChevronRight, Clock, Eye, Grid, Hash, Heart, Play, Star, Users, X, ZoomIn } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 
+interface MediaFile {
+  mediaType: 'image' | 'video'
+  mediaUrl: string
+  thumbnailUrl?: string
+}
 
 const HistoricalMomentDetailPage = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { language } = useLanguageStore()
+  const { user, isAuthenticated } = useAuthStore()
   const [moment, setMoment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [likeData, setLikeData] = useState({ isLiked: false, likes: 0, views: 0 })
+  const [isLiking, setIsLiking] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [showLightbox, setShowLightbox] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(0)
 
   const fetchMoment = async () => {
     if (!id) return
@@ -26,7 +38,31 @@ const HistoricalMomentDetailPage = () => {
       const response = await historicalMomentsApi.getById(id)
       
       if (response.data.success) {
-        setMoment(response.data.data)
+        const momentData = response.data.data
+        setMoment(momentData)
+        // If user is authenticated, get like status
+        if (isAuthenticated) {
+          try {
+            const likeResponse = await historicalMomentsApi.getLikeStatus(id)
+            if (likeResponse.data.success) {
+              setLikeData(likeResponse.data.data)
+            }
+          } catch (likeError) {
+            // If like status fails, just use the moment data
+            setLikeData({
+              isLiked: false,
+              likes: response.data.data.likes || 0,
+              views: response.data.data.views || 0
+            })
+          }
+        } else {
+          // For non-authenticated users, just show the counts
+          setLikeData({
+            isLiked: false,
+            likes: response.data.data.likes || 0,
+            views: response.data.data.views || 0
+          })
+        }
       } else {
         setError(t('historyDetailPage.historicalMomentNotFound'))
       }
@@ -38,9 +74,52 @@ const HistoricalMomentDetailPage = () => {
     }
   }
 
+  const handleLike = async () => {
+    if (!isAuthenticated) {
+      toast.error(t('common.loginRequired'), {
+        duration: 3000,
+        position: 'bottom-center',
+      })
+      return
+    }
+
+    if (!id || isLiking) return
+
+    try {
+      setIsLiking(true)
+      const response = await historicalMomentsApi.toggleLike(id)
+      
+      if (response.data.success) {
+        setLikeData(prev => ({
+          ...prev,
+          likes: response.data.data.likes,
+          isLiked: response.data.data.isLiked
+        }))
+        
+        toast.success(
+          response.data.data.isLiked 
+            ? t('historyDetailPage.likedSuccess') 
+            : t('historyDetailPage.unlikedSuccess'),
+          {
+            duration: 2000,
+            position: 'bottom-center',
+          }
+        )
+      }
+    } catch (error: any) {
+      console.error('Error toggling like:', error)
+      toast.error(error?.response?.data?.message || t('historyDetailPage.likeFailed'), {
+        duration: 3000,
+        position: 'bottom-center',
+      })
+    } finally {
+      setIsLiking(false)
+    }
+  }
+
   useEffect(() => {
     fetchMoment()
-  }, [id])
+  }, [id, isAuthenticated])
 
   const handleCopyLink = async () => {
     try {
@@ -93,6 +172,63 @@ const HistoricalMomentDetailPage = () => {
         })
       }
     }
+  }
+
+  // Get all media files (main + additional)
+  const getAllMediaFiles = (): MediaFile[] => {
+    if (!moment) return []
+    
+    const allFiles: MediaFile[] = []
+    
+    // Add main media file
+    const mainFile = {
+      mediaType: moment.mediaType,
+      mediaUrl: moment.mediaUrl,
+      thumbnailUrl: moment.thumbnailUrl
+    }
+    allFiles.push(mainFile)
+    
+    // Add additional media files
+    if (moment.mediaFiles && moment.mediaFiles.length > 0) {
+      allFiles.push(...moment.mediaFiles)
+    }
+    
+    return allFiles
+  }
+
+  const mediaFiles = getAllMediaFiles()
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === mediaFiles.length - 1 ? 0 : prev + 1
+    )
+  }
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? mediaFiles.length - 1 : prev - 1
+    )
+  }
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index)
+    setShowLightbox(true)
+  }
+
+  const closeLightbox = () => {
+    setShowLightbox(false)
+  }
+
+  const nextInLightbox = () => {
+    setLightboxIndex((prev) => 
+      prev === mediaFiles.length - 1 ? 0 : prev + 1
+    )
+  }
+
+  const prevInLightbox = () => {
+    setLightboxIndex((prev) => 
+      prev === 0 ? mediaFiles.length - 1 : prev - 1
+    )
   }
 
   if (isLoading) {
@@ -186,26 +322,59 @@ const HistoricalMomentDetailPage = () => {
         </div>
       </div>
 
-      {/* Hero Section with Media - Full Width */}
+      {/* Hero Section with Main Media */}
       <div className="relative w-full">
         <div className="relative w-full h-[60vh] min-h-[400px] max-h-[70vh] bg-gray-200 dark:bg-gray-800 overflow-hidden">
-          {moment.mediaType === 'video' ? (
-            <video
-              src={moment.mediaUrl}
-              controls
-              className="absolute inset-0 w-full h-full object-cover object-center"
-              poster={moment.thumbnailUrl}
-            />
-          ) : (
-            <img
-              src={moment.mediaUrl}
-              alt={moment.title}
-              className="absolute inset-0 w-full h-full object-cover object-center"
-              style={{
-                objectFit: 'cover',
-                objectPosition: 'center center'
-              }}
-            />
+          {mediaFiles.length > 0 && (
+            <>
+              {mediaFiles[currentImageIndex].mediaType === 'video' ? (
+                <video
+                  src={mediaFiles[currentImageIndex].mediaUrl}
+                  controls
+                  className="absolute inset-0 w-full h-full object-cover object-center"
+                  poster={mediaFiles[currentImageIndex].thumbnailUrl}
+                />
+              ) : (
+                <img
+                  src={mediaFiles[currentImageIndex].mediaUrl}
+                  alt={moment.title}
+                  className="absolute inset-0 w-full h-full object-cover object-center cursor-pointer"
+                  style={{
+                    objectFit: 'cover',
+                    objectPosition: 'center center'
+                  }}
+                  onClick={() => openLightbox(currentImageIndex)}
+                />
+              )}
+              
+              {/* Navigation arrows for multiple images */}
+              {mediaFiles.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors backdrop-blur-sm"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors backdrop-blur-sm"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </>
+              )}
+
+              {/* Zoom button for images */}
+              {mediaFiles[currentImageIndex].mediaType === 'image' && (
+                <button
+                  onClick={() => openLightbox(currentImageIndex)}
+                  className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors backdrop-blur-sm"
+                >
+                  <ZoomIn className="w-5 h-5" />
+                </button>
+              )}
+            </>
           )}
         </div>
         
@@ -230,11 +399,76 @@ const HistoricalMomentDetailPage = () => {
                   <Clock className="w-5 h-5" />
                   <span className="text-sm sm:text-base">{timeAgo(moment.date)}</span>
                 </div>
+                {mediaFiles.length > 1 && (
+                  <div className="flex items-center space-x-2">
+                    <Grid className="w-5 h-5" />
+                    <span className="text-sm sm:text-base">{mediaFiles.length} media files</span>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
         </div>
       </div>
+
+      {/* Media Thumbnails Gallery */}
+      {mediaFiles.length > 1 && (
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <Grid className="w-5 h-5 mr-2" />
+              Media Gallery ({mediaFiles.length} files)
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {mediaFiles.map((file, index) => (
+                <div
+                  key={index}
+                  className={`relative group cursor-pointer rounded-lg overflow-hidden ${
+                    index === currentImageIndex ? 'ring-4 ring-blue-500' : ''
+                  }`}
+                  onClick={() => {
+                    setCurrentImageIndex(index)
+                    if (file.mediaType === 'image') {
+                      openLightbox(index)
+                    }
+                  }}
+                >
+                  <div className="aspect-square bg-gray-200 dark:bg-gray-700">
+                    {file.mediaType === 'video' ? (
+                      <div className="relative w-full h-full">
+                        <img
+                          src={file.thumbnailUrl || file.mediaUrl}
+                          alt={`Media ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                          <Play className="w-8 h-8 text-white" />
+                        </div>
+                      </div>
+                    ) : (
+                      <img
+                        src={file.mediaUrl}
+                        alt={`Media ${index + 1}`}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                    )}
+                  </div>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                    {file.mediaType === 'image' && (
+                      <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    )}
+                  </div>
+                  {index === 0 && (
+                    <div className="absolute top-2 left-2 bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium">
+                      Main
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Content Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -317,7 +551,7 @@ const HistoricalMomentDetailPage = () => {
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{t('historyDetailPage.mediaType')}</p>
                       <p className="font-medium text-gray-900 dark:text-white capitalize">
-                        {t(`historyPage.${moment.mediaType}`)}
+                        {mediaFiles.length > 1 ? `${mediaFiles.length} media files` : t(`historyPage.${moment.mediaType}`)}
                       </p>
                     </div>
                   </div>
@@ -334,6 +568,57 @@ const HistoricalMomentDetailPage = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Like Button Card */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    {t('historyDetailPage.engagement')}
+                  </h3>
+                  <button
+                    onClick={handleLike}
+                    disabled={isLiking || !isAuthenticated}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                      likeData.isLiked
+                        ? 'bg-red-500 hover:bg-red-600 text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
+                    } ${isLiking ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
+                      !isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    <Heart className={`w-4 h-4 ${likeData.isLiked ? 'fill-current' : ''}`} />
+                    <span>{likeData.isLiked ? t('historyDetailPage.liked') : t('historyDetailPage.like')}</span>
+                  </button>
+                </div>
+                
+                <div className="flex items-center justify-center space-x-6">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {likeData.views}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('historyDetailPage.views')}</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Heart className="w-6 h-6 text-white" />
+                    </div>
+                    <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                      {likeData.likes}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('historyDetailPage.likes')}</p>
+                  </div>
+                </div>
+                
+                {!isAuthenticated && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-4">
+                    {t('historyDetailPage.loginToLike')}
+                  </p>
+                )}
               </div>
 
               {/* Share Card */}
@@ -357,39 +642,76 @@ const HistoricalMomentDetailPage = () => {
                   </button>
                 </div>
               </div>
-
-              {/* Stats Card */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                  {t('historyDetailPage.communityImpact')}
-                </h3>
-                
-                <div className="flex items-center justify-center space-x-6">
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Users className="w-6 h-6 text-white" />
-                    </div>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {Math.floor(Math.random() * 500) + 100}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('historyDetailPage.views')}</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Star className="w-6 h-6 text-white" />
-                    </div>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {Math.floor(Math.random() * 50) + 10}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('historyDetailPage.likes')}</p>
-                  </div>
-                </div>
-              </div>
             </motion.div>
           </div>
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {showLightbox && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
+            onClick={closeLightbox}
+          >
+            <div className="relative w-full h-full flex items-center justify-center p-4">
+              {/* Close button */}
+              <button
+                onClick={closeLightbox}
+                className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+              >
+                <X className="w-8 h-8" />
+              </button>
+
+              {/* Navigation buttons */}
+              {mediaFiles.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      prevInLightbox()
+                    }}
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 z-10"
+                  >
+                    <ChevronLeft className="w-12 h-12" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      nextInLightbox()
+                    }}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 z-10"
+                  >
+                    <ChevronRight className="w-12 h-12" />
+                  </button>
+                </>
+              )}
+
+              {/* Image counter */}
+              {mediaFiles.length > 1 && (
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white bg-black/50 px-4 py-2 rounded-lg">
+                  {lightboxIndex + 1} / {mediaFiles.length}
+                </div>
+              )}
+
+              {/* Main image */}
+              <motion.img
+                key={lightboxIndex}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                src={mediaFiles[lightboxIndex]?.mediaUrl}
+                alt={`Media ${lightboxIndex + 1}`}
+                className="max-w-full max-h-full object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

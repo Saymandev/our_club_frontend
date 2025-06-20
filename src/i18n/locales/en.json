@@ -24,7 +24,8 @@
     "linkCopyFailed": "Failed to copy link",
     "shareSuccessful": "Content shared successfully!",
     "shareFailed": "Failed to share content",
-    "shareNotSupported": "Sharing not supported on this device"
+    "shareNotSupported": "Sharing not supported on this device",
+    "loginRequired": "Please login to perform this action"
   },
   "header": {
     "clubName": "Adhare Alor Projonmo",
@@ -91,8 +92,15 @@
     "added": "Added",
     "shareThisMoment": "Share This Moment",
     "communityImpact": "Community Impact",
+    "engagement": "Engagement",
     "views": "Views",
     "likes": "Likes",
+    "like": "Like",
+    "liked": "Liked",
+    "likedSuccess": "Post liked successfully!",
+    "unlikedSuccess": "Post unliked successfully!",
+    "likeFailed": "Failed to like/unlike post",
+    "loginToLike": "Login to like this post",
     "timeAgo": {
       "daysAgo": "{{count}} days ago",
       "monthAgo": "{{count}} month ago",

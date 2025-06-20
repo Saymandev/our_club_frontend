@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Create axios instance
 const api = axios.create({
-  baseURL: 'https://our-club-backend.onrender.com/api',
+  baseURL: 'http://localhost:5001/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -114,6 +114,9 @@ export const historicalMomentsApi = {
   update: (id: string, data: any) => api.put(`/historical-moments/${id}`, data),
   delete: (id: string) => api.delete(`/historical-moments/${id}`),
   toggleHighlight: (id: string) => api.patch(`/historical-moments/${id}/toggle-highlight`),
+  // Like/Unlike functionality
+  toggleLike: (id: string) => api.post(`/historical-moments/like/${id}`),
+  getLikeStatus: (id: string) => api.get(`/historical-moments/like-status/${id}`),
 }
 
 // Upload API

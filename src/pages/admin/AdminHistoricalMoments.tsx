@@ -1,6 +1,6 @@
 import { historicalMomentsApi, uploadApi } from '@/services/api'
 import { motion } from 'framer-motion'
-import { Calendar, Camera, Edit, Plus, Search, Star, StarOff, Trash2, Upload } from 'lucide-react'
+import { Calendar, Camera, Edit, Image as ImageIcon, Plus, Search, Star, StarOff, Trash2, Upload, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
@@ -14,8 +14,16 @@ interface HistoricalMoment {
   mediaUrl: string
   publicId: string
   thumbnailUrl?: string
+  mediaFiles?: Array<{
+    mediaType: 'image' | 'video'
+    mediaUrl: string
+    publicId: string
+    thumbnailUrl?: string
+  }>
   tags: string[]
   isHighlighted: boolean
+  views: number
+  likes: number
   createdAt: string
   updatedAt: string
 }
@@ -28,6 +36,13 @@ interface HistoricalMomentForm {
   isHighlighted: boolean
 }
 
+interface MediaFile {
+  mediaType: 'image' | 'video'
+  mediaUrl: string
+  publicId: string
+  thumbnailUrl?: string
+}
+
 const AdminHistoricalMoments = () => {
   const [moments, setMoments] = useState<HistoricalMoment[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,12 +51,7 @@ const AdminHistoricalMoments = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [mediaFilter, setMediaFilter] = useState('all')
   const [uploading, setUploading] = useState(false)
-  const [uploadedFile, setUploadedFile] = useState<{
-    mediaType: 'image' | 'video'
-    mediaUrl: string
-    publicId: string
-    thumbnailUrl?: string
-  } | null>(null)
+  const [uploadedFiles, setUploadedFiles] = useState<MediaFile[]>([])
 
   const {
     register,
@@ -69,63 +79,95 @@ const AdminHistoricalMoments = () => {
     fetchMoments()
   }, [mediaFilter])
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+  const handleMultipleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
 
-    // Validate file
-    const isImage = file.type.startsWith('image/')
-    const isVideo = file.type.startsWith('video/')
-    
-    if (!isImage && !isVideo) {
-      toast.error('Please select a valid image or video file')
-      return
-    }
+    // Validate all files first
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      const isImage = file.type.startsWith('image/')
+      const isVideo = file.type.startsWith('video/')
+      
+      if (!isImage && !isVideo) {
+        toast.error(`File ${file.name} is not a valid image or video file`)
+        return
+      }
 
-    // Validate file size (50MB max)
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error('File size must be less than 50MB')
-      return
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error(`File ${file.name} size must be less than 50MB`)
+        return
+      }
     }
 
     try {
       setUploading(true)
-      const response = await uploadApi.single(file, 'historical-moments')
-      setUploadedFile({
+      const uploadPromises = []
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        uploadPromises.push(uploadApi.single(file, 'historical-moments'))
+      }
+
+      const responses = await Promise.all(uploadPromises)
+      
+      const newFiles: MediaFile[] = responses.map((response) => ({
         mediaType: response.data.data.resourceType,
         mediaUrl: response.data.data.url,
         publicId: response.data.data.publicId,
         thumbnailUrl: response.data.data.thumbnailUrl || response.data.data.url
-      })
-      toast.success('File uploaded successfully!')
+      }))
+
+      setUploadedFiles(prev => [...prev, ...newFiles])
+      toast.success(`${files.length} file(s) uploaded successfully!`)
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || 'Failed to upload file')
+      console.error('Upload error:', error)
+      toast.error(error?.response?.data?.message || 'Failed to upload files')
     } finally {
       setUploading(false)
     }
   }
 
+  const removeUploadedFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
   const handleCreateOrUpdate = async (data: HistoricalMomentForm) => {
-    const mediaToUse = editingMoment ? {
-      mediaType: editingMoment.mediaType,
-      mediaUrl: editingMoment.mediaUrl,
-      publicId: editingMoment.publicId,
-      thumbnailUrl: editingMoment.thumbnailUrl
-    } : uploadedFile
-    
-    if (!mediaToUse) {
-      toast.error('Please upload a media file')
+    if (!editingMoment && uploadedFiles.length === 0) {
+      toast.error('Please upload at least one media file')
       return
     }
 
     try {
-      const payload = {
+      let payload: any = {
         ...data,
         tags: data.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-        mediaType: mediaToUse.mediaType,
-        mediaUrl: mediaToUse.mediaUrl,
-        publicId: mediaToUse.publicId,
-        thumbnailUrl: mediaToUse.thumbnailUrl
+      }
+
+      if (editingMoment) {
+        // When editing, preserve existing media and add new files
+        payload.mediaType = editingMoment.mediaType
+        payload.mediaUrl = editingMoment.mediaUrl
+        payload.publicId = editingMoment.publicId
+        payload.thumbnailUrl = editingMoment.thumbnailUrl
+        
+        // Combine existing mediaFiles with new uploaded files
+        const existingMediaFiles = editingMoment.mediaFiles || []
+        const newMediaFiles = uploadedFiles || []
+        payload.mediaFiles = [...existingMediaFiles, ...newMediaFiles]
+      } else {
+        // When creating new moment
+        if (uploadedFiles.length > 0) {
+          // First file as main media
+          payload.mediaType = uploadedFiles[0].mediaType
+          payload.mediaUrl = uploadedFiles[0].mediaUrl
+          payload.publicId = uploadedFiles[0].publicId
+          payload.thumbnailUrl = uploadedFiles[0].thumbnailUrl
+          
+          // Additional files in mediaFiles array
+          const additionalFiles = uploadedFiles.length > 1 ? uploadedFiles.slice(1) : []
+          payload.mediaFiles = additionalFiles
+        }
       }
 
       if (editingMoment) {
@@ -138,10 +180,11 @@ const AdminHistoricalMoments = () => {
 
       setShowModal(false)
       setEditingMoment(null)
-      setUploadedFile(null)
+      setUploadedFiles([])
       reset()
       fetchMoments()
     } catch (error: any) {
+      console.error('Error saving moment:', error)
       toast.error(error?.response?.data?.message || 'Failed to save historical moment')
     }
   }
@@ -155,7 +198,7 @@ const AdminHistoricalMoments = () => {
       tags: moment.tags.join(', '),
       isHighlighted: moment.isHighlighted
     })
-    setUploadedFile(null)
+    setUploadedFiles([])
     setShowModal(true)
   }
 
@@ -186,6 +229,11 @@ const AdminHistoricalMoments = () => {
     moment.description.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  // Get total media count for a moment
+  const getMediaCount = (moment: HistoricalMoment) => {
+    return 1 + (moment.mediaFiles ? moment.mediaFiles.length : 0)
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -203,18 +251,20 @@ const AdminHistoricalMoments = () => {
             Manage club memories and historical moments
           </p>
         </div>
-        <button 
-          onClick={() => {
-            setEditingMoment(null)
-            setUploadedFile(null)
-            reset()
-            setShowModal(true)
-          }}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center space-x-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Moment</span>
-        </button>
+        <div className="flex space-x-3">
+          <button 
+            onClick={() => {
+              setEditingMoment(null)
+              setUploadedFiles([])
+              reset()
+              setShowModal(true)
+            }}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Moment</span>
+          </button>
+        </div>
       </motion.div>
 
       {/* Filters */}
@@ -284,6 +334,15 @@ const AdminHistoricalMoments = () => {
                     />
                   )}
                   
+                  <div className="absolute top-2 left-2">
+                    {getMediaCount(moment) > 1 && (
+                      <div className="bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
+                        <ImageIcon className="w-3 h-3" />
+                        <span>{getMediaCount(moment)}</span>
+                      </div>
+                    )}
+                  </div>
+                  
                   <div className="absolute top-2 right-2">
                     <button
                       onClick={() => handleToggleHighlight(moment._id)}
@@ -313,6 +372,19 @@ const AdminHistoricalMoments = () => {
                     <Calendar className="w-4 h-4 mr-1" />
                     {new Date(moment.date).toLocaleDateString()}
                   </div>
+                  
+                  {/* Stats */}
+                  <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
+                    <div className="flex items-center space-x-1">
+                      <span>👁️</span>
+                      <span>{moment.views || 0}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <span>❤️</span>
+                      <span>{moment.likes || 0}</span>
+                    </div>
+                  </div>
+                  
                   {moment.tags && moment.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-3">
                       {moment.tags.slice(0, 3).map((tag) => (
@@ -358,7 +430,7 @@ const AdminHistoricalMoments = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
           >
             <div className="p-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
@@ -366,56 +438,79 @@ const AdminHistoricalMoments = () => {
               </h2>
               
               <form onSubmit={handleSubmit(handleCreateOrUpdate)} className="space-y-6">
-                {/* Single File Upload */}
+                {/* Multiple File Upload */}
                 {!editingMoment && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Upload Media File *
+                      Upload Media Files * (First image will be the main image)
                     </label>
+                    
                     <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6">
-                      {!uploadedFile ? (
-                        <div className="text-center">
-                          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                          <label className="cursor-pointer">
-                            <span className="text-purple-600 hover:text-purple-500 text-lg font-medium">Upload file</span>
-                            <input
-                              type="file"
-                              className="hidden"
-                              accept="image/*,video/*"
-                              onChange={handleFileUpload}
-                              disabled={uploading}
-                            />
-                          </label>
-                          <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-                            Select an image or video (up to 50MB)
-                          </p>
-                          {uploading && (
-                            <div className="flex items-center justify-center mt-4">
-                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
-                              <span className="ml-2 text-sm text-gray-500">Uploading...</span>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          {uploadedFile.mediaType === 'image' ? (
-                            <img src={uploadedFile.mediaUrl} alt="Upload preview" className="w-48 h-32 object-cover rounded-lg mx-auto mb-4" />
-                          ) : (
-                            <video src={uploadedFile.mediaUrl} className="w-48 h-32 object-cover rounded-lg mx-auto mb-4" muted />
-                          )}
-                          <p className="text-green-600 dark:text-green-400 text-sm mb-2">
-                            ✓ File uploaded successfully
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => setUploadedFile(null)}
-                            className="text-red-600 hover:text-red-500 text-sm"
-                          >
-                            Remove file
-                          </button>
-                        </div>
-                      )}
+                      <div className="text-center">
+                        <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                        <label className="cursor-pointer">
+                          <span className="text-purple-600 hover:text-purple-500 text-lg font-medium">Upload files</span>
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*,video/*"
+                            multiple
+                            onChange={handleMultipleFileUpload}
+                            disabled={uploading}
+                            key={uploadedFiles.length} // Reset input when files change
+                          />
+                        </label>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
+                          Select multiple images or videos (up to 50MB each)
+                        </p>
+                        {uploading && (
+                          <div className="flex items-center justify-center mt-4">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                            <span className="ml-2 text-sm text-gray-500">Uploading...</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
+                    
+                    {/* Preview uploaded files */}
+                    {uploadedFiles.length > 0 && (
+                      <div className="mt-4">
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Uploaded Files ({uploadedFiles.length})
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {uploadedFiles.map((file, index) => (
+                            <div key={index} className="relative group">
+                              {file.mediaType === 'image' ? (
+                                <img 
+                                  src={file.mediaUrl} 
+                                  alt={`Upload ${index + 1}`} 
+                                  className="w-full h-24 object-cover rounded-lg" 
+                                />
+                              ) : (
+                                <video 
+                                  src={file.mediaUrl} 
+                                  className="w-full h-24 object-cover rounded-lg" 
+                                  muted 
+                                />
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => removeUploadedFile(index)}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                              {index === 0 && (
+                                <div className="absolute bottom-1 left-1 bg-blue-500 text-white px-2 py-1 rounded text-xs">
+                                  Main
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -423,17 +518,94 @@ const AdminHistoricalMoments = () => {
                 {editingMoment && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Current Media
+                      Current Media ({getMediaCount(editingMoment)} files)
                     </label>
-                    <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      {editingMoment.mediaType === 'image' ? (
-                        <img src={editingMoment.mediaUrl} alt={editingMoment.title} className="w-48 h-32 object-cover rounded-lg mx-auto" />
-                      ) : (
-                        <video src={editingMoment.mediaUrl} className="w-48 h-32 object-cover rounded-lg mx-auto" muted />
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      {/* Main media */}
+                      <div className="relative">
+                        {editingMoment.mediaType === 'image' ? (
+                          <img src={editingMoment.mediaUrl} alt={editingMoment.title} className="w-full h-24 object-cover rounded-lg" />
+                        ) : (
+                          <video src={editingMoment.mediaUrl} className="w-full h-24 object-cover rounded-lg" muted />
+                        )}
+                        <div className="absolute bottom-1 left-1 bg-blue-500 text-white px-2 py-1 rounded text-xs">
+                          Main
+                        </div>
+                      </div>
+                      
+                      {/* Additional media files */}
+                      {editingMoment.mediaFiles && editingMoment.mediaFiles.map((file, index) => (
+                        <div key={index} className="relative">
+                          {file.mediaType === 'image' ? (
+                            <img src={file.mediaUrl} alt={`Additional ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                          ) : (
+                            <video src={file.mediaUrl} className="w-full h-24 object-cover rounded-lg" muted />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Option to add more files when editing */}
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Add More Media Files (optional)
+                      </label>
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
+                        <div className="text-center">
+                          <label className="cursor-pointer">
+                            <span className="text-purple-600 hover:text-purple-500 font-medium">Add more files</span>
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*,video/*"
+                              multiple
+                              onChange={handleMultipleFileUpload}
+                              disabled={uploading}
+                            />
+                          </label>
+                          {uploading && (
+                            <div className="flex items-center justify-center mt-2">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
+                              <span className="ml-2 text-sm text-gray-500">Uploading...</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Show newly uploaded files for editing */}
+                      {uploadedFiles.length > 0 && (
+                        <div className="mt-4">
+                          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            New Files to Add ({uploadedFiles.length})
+                          </h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {uploadedFiles.map((file, index) => (
+                              <div key={index} className="relative group">
+                                {file.mediaType === 'image' ? (
+                                  <img 
+                                    src={file.mediaUrl} 
+                                    alt={`New ${index + 1}`} 
+                                    className="w-full h-24 object-cover rounded-lg" 
+                                  />
+                                ) : (
+                                  <video 
+                                    src={file.mediaUrl} 
+                                    className="w-full h-24 object-cover rounded-lg" 
+                                    muted 
+                                  />
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => removeUploadedFile(index)}
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
-                      <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
-                        {editingMoment.mediaType} file
-                      </p>
                     </div>
                   </div>
                 )}
@@ -513,7 +685,7 @@ const AdminHistoricalMoments = () => {
                     onClick={() => {
                       setShowModal(false)
                       setEditingMoment(null)
-                      setUploadedFile(null)
+                      setUploadedFiles([])
                       reset()
                     }}
                     className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
