@@ -117,7 +117,7 @@ const DonationsPage = () => {
   const currentLang = i18n.language as 'en' | 'bn'
   
   const enabledMobileBanking = Object.entries(settings.mobileBanking)
-    .filter(([key, service]) => service.enabled)
+    .filter(([_key, service]) => service.enabled)
     .map(([key, service]) => ({
       name: key === 'bkash' ? 'bKash' : key.charAt(0).toUpperCase() + key.slice(1),
       icon: key === 'bkash' ? '💳' : key === 'nagad' ? '📱' : key === 'rocket' ? '🚀' : '💰',

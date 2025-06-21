@@ -1,6 +1,6 @@
 import { announcementsApi } from '@/services/api'
 import { motion } from 'framer-motion'
-import { Edit, Megaphone, Plus, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react'
+import { Edit, Megaphone, Plus, Search, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
@@ -34,8 +34,9 @@ const AdminAnnouncements = () => {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null)
-  const [searchTerm] = useState('')
-  const [statusFilter] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [priorityFilter, setPriorityFilter] = useState('all')
 
   const {
     register,
@@ -61,7 +62,7 @@ const AdminAnnouncements = () => {
 
   useEffect(() => {
     fetchAnnouncements()
-  }, [statusFilter])
+  }, [])
 
   const handleCreateOrUpdate = async (data: AnnouncementForm) => {
     try {
@@ -125,10 +126,19 @@ const AdminAnnouncements = () => {
     }
   }
 
-  const filteredAnnouncements = announcements.filter(announcement =>
-    announcement.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    announcement.content.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredAnnouncements = announcements.filter(announcement => {
+    const matchesSearch = 
+      announcement.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      announcement.content.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesStatus = statusFilter === 'all' || 
+      (statusFilter === 'published' && announcement.isPublished) ||
+      (statusFilter === 'draft' && !announcement.isPublished)
+    
+    const matchesPriority = priorityFilter === 'all' || announcement.priority === priorityFilter
+    
+    return matchesSearch && matchesStatus && matchesPriority
+  })
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -167,25 +177,81 @@ const AdminAnnouncements = () => {
         </button>
       </motion.div>
 
+      {/* Search and Filters */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="card p-12 text-center"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6"
       >
-        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Megaphone className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Search Announcements
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by title or content..."
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:w-80">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Status
+              </label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="all">All Status</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Priority
+              </label>
+              <select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="all">All Priorities</option>
+                <option value="high">High Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="low">Low Priority</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          Announcements Management
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-          This page will contain the full CRUD interface for managing announcements. 
-          Features will include creating, editing, deleting, and publishing announcements.
-        </p>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Coming soon in the full implementation...
-        </div>
+        
+        {(searchTerm || statusFilter !== 'all' || priorityFilter !== 'all') && (
+          <div className="mt-4 flex items-center justify-between">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              Showing {filteredAnnouncements.length} of {announcements.length} announcements
+            </span>
+            <button
+              onClick={() => {
+                setSearchTerm('')
+                setStatusFilter('all')
+                setPriorityFilter('all')
+              }}
+              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              Clear Filters
+            </button>
+          </div>
+        )}
       </motion.div>
 
       <motion.div
