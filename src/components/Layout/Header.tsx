@@ -21,6 +21,7 @@ const Header = () => {
     { name: t('common.announcements'), href: '/announcements' },
     { name: t('common.history'), href: '/history' },
     { name: t('common.bloodDonors'), href: '/blood-donors' },
+    { name: t('common.donations'), href: '/donations' },
   ]
 
   const isActivePath = (path: string) => {
@@ -38,22 +39,22 @@ const Header = () => {
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <img src={logo} alt="logo" className="w-full h-full object-cover" />
+                <img src={logo} alt="logo" className="w-full h-full object-cover rounded-lg" />
               </div>
-              <span className="font-heading font-bold text-xl text-gray-900 dark:text-white hidden md:block">
+              <span className="font-heading font-bold text-lg lg:text-xl text-gray-900 dark:text-white hidden sm:block">
                 {t('header.clubName')}
               </span>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation - Show on large screens only */}
+          <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200',
+                  'px-2 xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 whitespace-nowrap',
                   isActivePath(item.href)
                     ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
                     : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
@@ -65,9 +66,11 @@ const Header = () => {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Language Switcher */}
-            <LanguageSwitcher />
+          <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+            {/* Language Switcher - Hide on very small screens */}
+            <div className="hidden sm:block">
+              <LanguageSwitcher />
+            </div>
 
             {/* Theme Toggle */}
             <button
@@ -76,21 +79,21 @@ const Header = () => {
               aria-label={t('header.toggleTheme')}
             >
               {theme === 'dark' ? (
-                <Sun className="w-5 h-5" />
+                <Sun className="w-4 h-4 sm:w-5 sm:h-5" />
               ) : (
-                <Moon className="w-5 h-5" />
+                <Moon className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
             </button>
 
             {/* User Menu */}
             {isAuthenticated && user ? (
-              <div className="relative">
+              <div className="relative hidden sm:block">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 rounded-lg"
+                  className="flex items-center space-x-1 lg:space-x-2 px-2 lg:px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 rounded-lg"
                 >
                   <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">{user.username}</span>
+                  <span className="hidden md:inline max-w-20 truncate">{user.username}</span>
                   <ChevronDown className="w-4 h-4" />
                 </button>
                 
@@ -119,16 +122,16 @@ const Header = () => {
             ) : (
               <Link
                 to="/login"
-                className="btn-primary text-sm"
+                className="btn-primary text-sm px-3 py-2 hidden sm:block"
               >
                 {t('common.login')}
               </Link>
             )}
 
-            {/* Mobile menu button */}
+            {/* Mobile menu button - Show earlier */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+              className="lg:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
               aria-label={t('header.toggleMenu')}
             >
               {isMenuOpen ? (
@@ -140,35 +143,66 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation - Show on tablets and mobile */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700">
-            <nav className="flex flex-col space-y-2">
+          <div className="lg:hidden py-4 border-t border-gray-200 dark:border-gray-700">
+            <nav className="flex flex-col space-y-1">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
                   onClick={() => setIsMenuOpen(false)}
                   className={cn(
-                    'px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200',
+                    'px-3 py-3 rounded-md text-base font-medium transition-colors duration-200',
                     isActivePath(item.href)
                       ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                   )}
                 >
                   {item.name}
                 </Link>
               ))}
               
-              {!isAuthenticated && (
-                <Link
-                  to="/login"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="px-3 py-2 text-sm font-medium text-primary-600 dark:text-primary-400"
-                >
-                  {t('common.login')}
-                </Link>
-              )}
+              {/* Mobile-only items */}
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-700 mt-3">
+                {/* Language Switcher for mobile */}
+                <div className="px-3 py-2 sm:hidden">
+                  <LanguageSwitcher />
+                </div>
+                
+                {/* User menu items for mobile when authenticated */}
+                {isAuthenticated && user ? (
+                  <>
+                    <div className="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 mb-2">
+                      {user.username}
+                    </div>
+                    <Link
+                      to="/my-blood-donation"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
+                    >
+                      <Droplets className="w-5 h-5 mr-3" />
+                      {t('bloodDonation.myProfile')}
+                    </Link>
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
+                    >
+                      <Settings className="w-5 h-5 mr-3" />
+                      Admin Panel
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block px-3 py-3 text-base font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md"
+                  >
+                    {t('common.login')}
+                  </Link>
+                )}
+              </div>
             </nav>
           </div>
         )}

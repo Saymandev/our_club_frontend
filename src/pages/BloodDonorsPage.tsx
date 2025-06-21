@@ -95,7 +95,7 @@ const BloodDonorsPage: React.FC = () => {
       }
     } else {
       const days = donor.daysSinceLastDonation || 0
-      const remainingDays = 90 - days
+      const remainingDays = 120 - days
       return {
         text: t('bloodDonation.availableIn', { days: remainingDays }),
         className: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'

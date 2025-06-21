@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Create axios instance
 const api = axios.create({
-  baseURL: 'https://our-club-backend.onrender.com/api',
+  baseURL: 'http://localhost:5001/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -166,6 +166,18 @@ export const sliderApi = {
   updateOrder: (slides: any[]) => api.put('/slider/order/update', { slides })
 }
 
+// Donation Settings API
+export const donationApi = {
+  // Public route
+  getSettings: () => api.get('/donations/settings'),
+  
+  // Admin routes
+  updateSettings: (data: any) => api.put('/donations/settings', data),
+  toggleProvider: (category: string, provider: string, enabled: boolean) => 
+    api.patch(`/donations/settings/toggle/${category}/${provider}`, { enabled }),
+  resetSettings: () => api.post('/donations/settings/reset'),
+}
+
 // Blood Donation API
 export const bloodDonationApi = {
   // Public routes
@@ -197,6 +209,9 @@ export const bloodDonationApi = {
     contactNumber?: string
     lastDonationDate?: string
   }) => api.put(`/blood-donation/admin/users/${userId}`, data),
+  
+  adminResetDonationAvailability: (userId: string) => 
+    api.post(`/blood-donation/admin/users/${userId}/reset-availability`),
 }
 
 export default api 

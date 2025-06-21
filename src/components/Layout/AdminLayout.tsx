@@ -4,6 +4,7 @@ import { cn } from '@/utils/cn'
 import {
   Camera,
   Droplets,
+  Heart,
   Home,
   ImageIcon,
   LogOut,
@@ -34,6 +35,7 @@ const AdminLayout = () => {
     { name: 'Historical Moments', href: '/admin/historical-moments', icon: Camera },
     { name: 'Slider Management', href: '/admin/slider', icon: ImageIcon },
     { name: t('bloodDonation.adminTitle'), href: '/admin/blood-donation', icon: Droplets },
+    { name: 'Donation Settings', href: '/admin/donations', icon: Heart },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ]
 

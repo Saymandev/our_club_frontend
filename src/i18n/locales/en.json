@@ -4,6 +4,7 @@
     "announcements": "Announcements",
     "history": "History",
     "bloodDonors": "Blood Donors",
+    "donations": "Donations",
     "login": "Login",
     "loading": "Loading...",
     "language": "Language",
@@ -12,9 +13,9 @@
     "previous": "Previous",
     "next": "Next",
     "viewDetails": "View Details",
-    "backToWebsite": "← Back to website",
+    "backToWebsite": "← Back to Website",
     "allRightsReserved": "All rights reserved",
-    "madeWithLove": "Made with",
+    "madeWithLove": "Made with love",
     "forOurCommunity": "for our community",
     "backToHistory": "Back to History",
     "share": "Share",
@@ -24,8 +25,8 @@
     "linkCopyFailed": "Failed to copy link",
     "shareSuccessful": "Content shared successfully!",
     "shareFailed": "Failed to share content",
-    "shareNotSupported": "Sharing not supported on this device",
-    "loginRequired": "Please login to perform this action"
+    "shareNotSupported": "Sharing is not supported on this device",
+    "loginRequired": "Please log in to perform this action"
   },
   "header": {
     "clubName": "Adhare Alor Projonmo",
@@ -169,7 +170,7 @@
     "myProfile": "My Blood Donation",
     "adminTitle": "Blood Donation Management",
     "description": "Find blood donors in your community. In case of emergency, use the quick search below.",
-    "adminDescription": "Manage blood donors and their donation records",
+    "adminDescription": "Manage blood donors and their donation records. Donors are available to donate again after 4 months.",
     "emergencySearch": "🚨 Emergency Blood Search",
     "emergencyDescription": "Find available blood donors by blood type",
     "selectBloodGroup": "Select blood group needed",
@@ -192,6 +193,7 @@
     "status": "Status",
     "actions": "Actions",
     "edit": "Edit",
+    "resetAvailability": "Reset Availability",
     "available": "Available",
     "availableIn": "Available in {{days}} days",
     "neverDonated": "Never donated",
@@ -209,6 +211,7 @@
     "contactNumber": "Contact Number",
     "donationEligibility": "Donation Eligibility",
     "eligibleNow": "You are eligible to donate blood now!",
+    "eligibleAfter": "You will be eligible to donate again after 4 months from your last donation.",
     "eligibleIn": "You'll be eligible to donate again in {{days}} days",
     "recordNewDonation": "🩸 Record New Donation",
     "noBloodInfo": "No blood donation information found",
@@ -216,7 +219,7 @@
     "setupButton": "Set Up Profile",
     "didYouKnow": "💡 Did you know?",
     "facts": {
-      "frequency": "• You can donate blood every 3 months (90 days)",
+      "frequency": "• You can donate blood every 4 months (120 days)",
       "impact": "• One blood donation can save up to 3 lives",
       "duration": "• It takes about 10-15 minutes to donate blood",
       "recovery": "• Your body replaces the donated blood within 24-48 hours"
@@ -270,5 +273,30 @@
       "registrationFailed": "Registration failed"
     },
     "newDonorLink": "🩸 New here? Register as a Blood Donor"
+  },
+  "donations": {
+    "title": "Support Our Club",
+    "description": "Your generous donations help us continue our mission and support our community initiatives. Every contribution makes a difference.",
+    "mobileBanking": "Mobile Banking",
+    "mobileBankingDescription": "Send money easily using these popular mobile banking services in Bangladesh:",
+    "bankAccount": "Bank Account",
+    "bankAccountDescription": "You can also donate through direct bank transfer:",
+    "bKashInstructions": "Send money to this bKash personal number. Use 'Send Money' option in your bKash app.",
+    "nagadInstructions": "Send money to this Nagad personal number. Use 'Send Money' option in your Nagad app.",
+    "rocketInstructions": "Send money to this Rocket personal number. Use 'Send Money' option in your Rocket app.",
+    "upayInstructions": "Send money to this Upay personal number. Use 'Send Money' option in your Upay app.",
+    "bankName": "Bank Name",
+    "accountName": "Account Name",
+    "accountNumber": "Account Number",
+    "routingNumber": "Routing Number",
+    "branch": "Branch",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "copyFailed": "Failed to copy",
+    "thankYou": "Thank You!",
+    "thankYouMessage": "Your support helps us grow our community and continue our mission. Every donation, no matter the size, makes a meaningful impact on our programs and initiatives.",
+    "questions": "Have questions about donations?",
+    "or": "or",
+    "contact": "Contact us at"
   }
 } 

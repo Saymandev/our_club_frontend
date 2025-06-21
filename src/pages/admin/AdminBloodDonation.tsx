@@ -1,7 +1,7 @@
 import LoadingSpinner from '@/components/UI/LoadingSpinner'
 import { bloodDonationApi } from '@/services/api'
 import { User } from '@/store/authStore'
-import { Edit } from 'lucide-react'
+import { Edit, RotateCcw } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
@@ -78,6 +78,20 @@ const AdminBloodDonation: React.FC = () => {
     }
   }
 
+  const handleResetAvailability = async (donor: BloodDonor) => {
+    if (!confirm(`Are you sure you want to reset donation availability for ${donor.username}? This will make them immediately available to donate.`)) {
+      return
+    }
+
+    try {
+      await bloodDonationApi.adminResetDonationAvailability(donor.id)
+      toast.success('Donation availability reset successfully!')
+      fetchDonors() // Refresh the list
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to reset availability')
+    }
+  }
+
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
       ...prev,
@@ -98,7 +112,7 @@ const AdminBloodDonation: React.FC = () => {
       }
     } else {
       const days = donor.daysSinceLastDonation || 0
-      const remainingDays = 90 - days
+      const remainingDays = 120 - days
       return {
         text: t('bloodDonation.availableIn', { days: remainingDays }),
         className: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
@@ -242,13 +256,25 @@ const AdminBloodDonation: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => handleEditDonor(donor)}
-                          className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 flex items-center gap-1"
-                        >
-                          <Edit className="w-4 h-4" />
-                          {t('bloodDonation.edit')}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEditDonor(donor)}
+                            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 flex items-center gap-1"
+                          >
+                            <Edit className="w-4 h-4" />
+                            {t('bloodDonation.edit')}
+                          </button>
+                          {!donor.isAvailableForDonation && (
+                            <button
+                              onClick={() => handleResetAvailability(donor)}
+                              className="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 flex items-center gap-1"
+                              title="Reset donation availability"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                              Reset
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   )

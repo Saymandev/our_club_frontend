@@ -112,7 +112,7 @@ const MyBloodDonationPage: React.FC = () => {
   const getAvailabilityMessage = () => {
     if (!bloodInfo?.isAvailableForDonation) {
       const days = bloodInfo?.daysSinceLastDonation || 0
-      const remainingDays = 90 - days
+      const remainingDays = 120 - days
       return {
         message: t('bloodDonation.eligibleIn', { days: remainingDays }),
         className: 'text-red-600 bg-red-50',
