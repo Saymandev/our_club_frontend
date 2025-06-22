@@ -2,13 +2,12 @@ import axios from 'axios'
 
 // Create axios instance
 const api = axios.create({
-  baseURL: 'https://our-club-backend.onrender.com/api',
+  baseURL: 'http://localhost:5001/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 })
-
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
@@ -212,6 +211,50 @@ export const bloodDonationApi = {
   
   adminResetDonationAvailability: (userId: string) => 
     api.post(`/blood-donation/admin/users/${userId}/reset-availability`),
+}
+
+// Events API
+export const eventsApi = {
+  // Public routes
+  getAll: (params?: {
+    page?: number
+    limit?: number
+    category?: string
+    status?: string
+    featured?: string
+    tags?: string
+  }) => api.get('/events', { params }),
+  getById: (id: string) => api.get(`/events/${id}`),
+  getFeatured: (params?: { limit?: number }) =>
+    api.get('/events/featured', { params }),
+  getByCategory: (category: string, params?: {
+    page?: number
+    limit?: number
+  }) => api.get(`/events/category/${category}`, { params }),
+  
+  // Authenticated routes
+  registerForEvent: (eventId: string, participantData: {
+    participantName: string;
+    participantPhone: string;
+    participantEmail?: string;
+  }) => api.post(`/events/${eventId}/register`, participantData),
+  
+  // Admin routes
+  getAllAdmin: (params?: {
+    page?: number
+    limit?: number
+    status?: string
+    category?: string
+    published?: string
+  }) => api.get('/events/admin/all', { params }),
+  getStats: () => api.get('/events/admin/stats'),
+  create: (data: any) => api.post('/events/admin', data),
+  update: (id: string, data: any) => api.put(`/events/admin/${id}`, data),
+  delete: (id: string) => api.delete(`/events/admin/${id}`),
+  togglePublish: (id: string) => api.patch(`/events/admin/${id}/publish`),
+  toggleFeature: (id: string) => api.patch(`/events/admin/${id}/feature`),
+  getEventRegistrations: (eventId: string, params?: any) => 
+    api.get(`/events/admin/${eventId}/registrations`, { params }),
 }
 
 export default api 

@@ -2,19 +2,20 @@ import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils/cn'
 import {
-  Camera,
-  Droplets,
-  Heart,
-  Home,
-  ImageIcon,
-  LogOut,
-  Megaphone,
-  Menu,
-  Moon,
-  Settings,
-  Sun,
-  User,
-  X
+    Calendar,
+    Camera,
+    Droplets,
+    Heart,
+    Home,
+    ImageIcon,
+    LogOut,
+    Megaphone,
+    Menu,
+    Moon,
+    Settings,
+    Sun,
+    User,
+    X
 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -32,6 +33,7 @@ const AdminLayout = () => {
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: Home },
     { name: 'Announcements', href: '/admin/announcements', icon: Megaphone },
+    { name: 'Events', href: '/admin/events', icon: Calendar },
     { name: 'Historical Moments', href: '/admin/historical-moments', icon: Camera },
     { name: 'Slider Management', href: '/admin/slider', icon: ImageIcon },
     { name: t('bloodDonation.adminTitle'), href: '/admin/blood-donation', icon: Droplets },

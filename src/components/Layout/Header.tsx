@@ -19,6 +19,7 @@ const Header = () => {
   const navigation = [
     { name: t('common.home'), href: '/' },
     { name: t('common.announcements'), href: '/announcements' },
+    { name: t('eventsPage.title'), href: '/events' },
     { name: t('common.history'), href: '/history' },
     { name: t('common.bloodDonors'), href: '/blood-donors' },
     { name: t('common.donations'), href: '/donations' },
@@ -47,14 +48,14 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation - Show on large screens only */}
-          <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+          {/* Desktop Navigation - Show on extra large screens only due to many nav items */}
+          <nav className="hidden xl:flex items-center space-x-3 2xl:space-x-6">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'px-2 xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 whitespace-nowrap',
+                  'px-2 2xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 whitespace-nowrap',
                   isActivePath(item.href)
                     ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
                     : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
@@ -66,9 +67,9 @@ const Header = () => {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
-            {/* Language Switcher - Hide on very small screens */}
-            <div className="hidden sm:block">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Language Switcher - Hide on small screens */}
+            <div className="hidden md:block">
               <LanguageSwitcher />
             </div>
 
@@ -85,15 +86,15 @@ const Header = () => {
               )}
             </button>
 
-            {/* User Menu */}
+            {/* User Menu - Only show on larger screens */}
             {isAuthenticated && user ? (
-              <div className="relative hidden sm:block">
+              <div className="relative hidden lg:block">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-1 lg:space-x-2 px-2 lg:px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 rounded-lg"
+                  className="flex items-center space-x-1 xl:space-x-2 px-2 xl:px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 rounded-lg"
                 >
                   <User className="w-4 h-4" />
-                  <span className="hidden md:inline max-w-20 truncate">{user.username}</span>
+                  <span className="hidden xl:inline max-w-20 truncate">{user.username}</span>
                   <ChevronDown className="w-4 h-4" />
                 </button>
                 
@@ -122,16 +123,16 @@ const Header = () => {
             ) : (
               <Link
                 to="/login"
-                className="btn-primary text-sm px-3 py-2 hidden sm:block"
+                className="btn-primary text-sm px-3 py-2 hidden lg:block"
               >
                 {t('common.login')}
               </Link>
             )}
 
-            {/* Mobile menu button - Show earlier */}
+            {/* Mobile menu button - Show on tablets and mobile */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+              className="xl:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
               aria-label={t('header.toggleMenu')}
             >
               {isMenuOpen ? (
@@ -145,7 +146,7 @@ const Header = () => {
 
         {/* Mobile Navigation - Show on tablets and mobile */}
         {isMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="xl:hidden py-4 border-t border-gray-200 dark:border-gray-700">
             <nav className="flex flex-col space-y-1">
               {navigation.map((item) => (
                 <Link
@@ -166,7 +167,7 @@ const Header = () => {
               {/* Mobile-only items */}
               <div className="pt-3 border-t border-gray-200 dark:border-gray-700 mt-3">
                 {/* Language Switcher for mobile */}
-                <div className="px-3 py-2 sm:hidden">
+                <div className="px-3 py-2 md:hidden">
                   <LanguageSwitcher />
                 </div>
                 

@@ -298,5 +298,57 @@
     "questions": "দান সম্পর্কে প্রশ্ন আছে?",
     "or": "অথবা",
     "contact": "যোগাযোগ করুন"
+  },
+  "eventsPage": {
+    "title": "ইভেন্ট",
+    "description": "রোমাঞ্চকর ইভেন্ট এবং কার্যক্রমে আমাদের সাথে যোগ দিন। পরিবেশ বিষয়ক উদ্যোগ থেকে সাংস্কৃতিক উৎসব পর্যন্ত, সবার জন্য কিছু না কিছু আছে।",
+    "filters": {
+      "allCategories": "সব বিভাগ",
+      "allStatuses": "সব অবস্থা"
+    },
+    "categories": {
+      "environment": "পরিবেশ",
+      "education": "শিক্ষা",
+      "social": "সামাজিক",
+      "health": "স্বাস্থ্য",
+      "cultural": "সাংস্কৃতিক",
+      "sports": "খেলাধুলা",
+      "other": "অন্যান্য"
+    },
+    "statuses": {
+      "upcoming": "আসন্ন",
+      "ongoing": "চলমান",
+      "completed": "সম্পন্ন"
+    },
+    "showingPage": "{{total}}-এর {{current}} নম্বর পৃষ্ঠা দেখানো হচ্ছে",
+    "noEventsFound": "কোনো ইভেন্ট পাওয়া যায়নি",
+    "noEventsDescription": "আপনার বর্তমান ফিল্টার মানদণ্ডের সাথে মেলে এমন কোনো ইভেন্ট নেই।",
+    "participants": "অংশগ্রহণকারী",
+    "registrationOpen": "নিবন্ধন খোলা",
+    "dayLeft": "দিন বাকি",
+    "daysLeft": "দিন বাকি"
+  },
+  "eventDetailPage": {
+    "backToEvents": "ইভেন্টে ফিরে যান",
+    "error": "ত্রুটি",
+    "eventNotFound": "ইভেন্ট পাওয়া যায়নি",
+    "errorFetchingEvent": "ইভেন্ট লোড করতে ব্যর্থ",
+    "featured": "বৈশিষ্ট্যযুক্ত",
+    "viewOnMap": "মানচিত্রে দেখুন",
+    "participationFee": "অংশগ্রহণ ফি",
+    "participants": "অংশগ্রহণকারী",
+    "registrationOpen": "নিবন্ধন খোলা",
+    "registrationClosed": "নিবন্ধন বন্ধ",
+    "contact": "যোগাযোগ",
+    "organizer": "আয়োজক",
+    "registration": "নিবন্ধন",
+    "registrationInstructions": "এই ইভেন্টে নিবন্ধনের জন্য নিচের বোতামে ক্লিক করুন। নিবন্ধনের জন্য আপনাকে লগইন করতে হবে।",
+    "registerNow": "এখনই নিবন্ধন করুন",
+    "registering": "নিবন্ধন করা হচ্ছে...",
+    "registrationClosedMessage": "এই ইভেন্টের জন্য নিবন্ধন বন্ধ বা পূর্ণ।",
+    "aboutEvent": "এই ইভেন্ট সম্পর্কে",
+    "tags": "ট্যাগ",
+    "registrationSuccess": "ইভেন্টে সফলভাবে নিবন্ধন হয়েছে!",
+    "registrationError": "ইভেন্টে নিবন্ধন করতে ব্যর্থ"
   }
 } 

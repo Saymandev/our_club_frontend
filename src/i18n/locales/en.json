@@ -298,5 +298,65 @@
     "questions": "Have questions about donations?",
     "or": "or",
     "contact": "Contact us at"
+  },
+  "eventsPage": {
+    "title": "Events",
+    "description": "Join us for exciting events and activities. From environmental initiatives to cultural celebrations, there's something for everyone.",
+    "filters": {
+      "allCategories": "All Categories",
+      "allStatuses": "All Statuses"
+    },
+    "categories": {
+      "environment": "Environment",
+      "education": "Education",
+      "social": "Social",
+      "health": "Health",
+      "cultural": "Cultural",
+      "sports": "Sports",
+      "other": "Other"
+    },
+    "statuses": {
+      "upcoming": "Upcoming",
+      "ongoing": "Ongoing",
+      "completed": "Completed"
+    },
+    "showingPage": "Showing page {{current}} of {{total}}",
+    "noEventsFound": "No events found",
+    "noEventsDescription": "There are no events matching your current filter criteria.",
+    "participants": "participants",
+    "registrationOpen": "Registration Open",
+    "dayLeft": "day left",
+    "daysLeft": "days left"
+  },
+  "eventDetailPage": {
+    "backToEvents": "Back to Events",
+    "featured": "Featured",
+    "participants": "participants",
+    "contact": "Contact Information",
+    "registration": "Event Registration",
+    "registrationInstructions": "Join this amazing event! Fill out the form below to secure your spot.",
+    "registerNow": "Register Now",
+    "participantName": "Full Name",
+    "phoneNumber": "Phone Number",
+    "emailAddress": "Email Address",
+    "optional": "optional",
+    "enterYourName": "Enter your full name",
+    "enterYourPhone": "Enter your phone number (e.g., +8801234567890)",
+    "enterYourEmail": "Enter your email address",
+    "confirmRegistration": "Confirm Registration",
+    "cancel": "Cancel",
+    "registering": "Registering...",
+    "registrationSuccess": "🎉 Successfully registered for the event! We'll contact you with further details.",
+    "registrationError": "Failed to register for the event. Please try again.",
+    "registrationClosedMessage": "Registration for this event is closed or full. Contact the organizer for more information.",
+    "alreadyRegistered": "You are already registered for this event.",
+    "phoneAlreadyRegistered": "This phone number is already registered for this event.",
+    "eventFull": "This event is full. You can join the waitlist.",
+    "participationFee": "Participation Fee",
+    "aboutEvent": "About This Event",
+    "tags": "Tags",
+    "error": "Error",
+    "eventNotFound": "Event not found",
+    "errorFetchingEvent": "Error loading event details"
   }
 } 
