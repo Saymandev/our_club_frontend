@@ -296,12 +296,12 @@ const AdminAnnouncements = () => {
                           <Edit className="w-4 h-4" />
                         </button>
                         {user?.role === 'admin' && (
-                          <button
-                            onClick={() => handleDelete(announcement._id)}
-                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                        <button
+                          onClick={() => handleDelete(announcement._id)}
+                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                         )}
                       </div>
                     </div>
@@ -400,12 +400,12 @@ const AdminAnnouncements = () => {
                             <Edit className="w-4 h-4" />
                           </button>
                           {user?.role === 'admin' && (
-                            <button
-                              onClick={() => handleDelete(announcement._id)}
-                              className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                          <button
+                            onClick={() => handleDelete(announcement._id)}
+                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                           )}
                         </div>
                       </td>
