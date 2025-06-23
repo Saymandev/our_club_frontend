@@ -31,17 +31,22 @@ const AdminLayout = () => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: Home },
-    { name: 'Announcements', href: '/admin/announcements', icon: Megaphone },
-    { name: 'Events', href: '/admin/events', icon: Calendar },
-    { name: 'Historical Moments', href: '/admin/historical-moments', icon: Camera },
-    { name: 'Slider Management', href: '/admin/slider', icon: ImageIcon },
-    { name: t('bloodDonation.adminTitle'), href: '/admin/blood-donation', icon: Droplets },
-    { name: 'Donation Settings', href: '/admin/donations', icon: Heart },
-    { name: 'Payment Verification', href: '/admin/payment-verification', icon: CreditCard },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
+  // Filter navigation items based on user role
+  const allNavigation = [
+    { name: 'Dashboard', href: '/admin', icon: Home, roles: ['admin', 'moderator'] },
+    { name: 'Announcements', href: '/admin/announcements', icon: Megaphone, roles: ['admin', 'moderator'] },
+    { name: 'Events', href: '/admin/events', icon: Calendar, roles: ['admin'] },
+    { name: 'Historical Moments', href: '/admin/historical-moments', icon: Camera, roles: ['admin', 'moderator'] },
+    { name: 'Slider Management', href: '/admin/slider', icon: ImageIcon, roles: ['admin'] },
+    { name: t('bloodDonation.adminTitle'), href: '/admin/blood-donation', icon: Droplets, roles: ['admin'] },
+    { name: 'Donation Settings', href: '/admin/donations', icon: Heart, roles: ['admin'] },
+    { name: 'Payment Verification', href: '/admin/payment-verification', icon: CreditCard, roles: ['admin'] },
+    { name: 'Settings', href: '/admin/settings', icon: Settings, roles: ['admin'] },
   ]
+
+  const navigation = allNavigation.filter(item => 
+    item.roles.includes(user?.role || 'moderator')
+  )
 
   const isActivePath = (path: string) => {
     if (path === '/admin') {

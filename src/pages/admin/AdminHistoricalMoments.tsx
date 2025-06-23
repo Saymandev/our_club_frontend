@@ -1,4 +1,5 @@
 import { historicalMomentsApi, uploadApi } from '@/services/api'
+import { useAuthStore } from '@/store/authStore'
 import { motion } from 'framer-motion'
 import { Calendar, Camera, Edit, Image as ImageIcon, Plus, Search, Star, StarOff, Trash2, Upload, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -44,6 +45,7 @@ interface MediaFile {
 }
 
 const AdminHistoricalMoments = () => {
+  const { user } = useAuthStore()
   const [moments, setMoments] = useState<HistoricalMoment[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -515,12 +517,14 @@ const AdminHistoricalMoments = () => {
                     >
                       <Edit className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => handleDelete(moment._id)}
-                      className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {user?.role === 'admin' && (
+                      <button
+                        onClick={() => handleDelete(moment._id)}
+                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

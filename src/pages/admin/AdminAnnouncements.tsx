@@ -1,4 +1,5 @@
 import { announcementsApi } from '@/services/api'
+import { useAuthStore } from '@/store/authStore'
 import { motion } from 'framer-motion'
 import { Edit, Megaphone, Plus, Search, ToggleLeft, ToggleRight, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -30,6 +31,7 @@ interface AnnouncementForm {
 }
 
 const AdminAnnouncements = () => {
+  const { user } = useAuthStore()
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -293,12 +295,14 @@ const AdminAnnouncements = () => {
                         >
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(announcement._id)}
-                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {user?.role === 'admin' && (
+                          <button
+                            onClick={() => handleDelete(announcement._id)}
+                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
@@ -395,12 +399,14 @@ const AdminAnnouncements = () => {
                           >
                             <Edit className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => handleDelete(announcement._id)}
-                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {user?.role === 'admin' && (
+                            <button
+                              onClick={() => handleDelete(announcement._id)}
+                              className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
