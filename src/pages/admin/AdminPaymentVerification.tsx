@@ -47,8 +47,8 @@ interface VerificationForm {
 const AdminPaymentVerification = () => {
   const [payments, setPayments] = useState<PendingPayment[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
+  const [currentPage, _setCurrentPage] = useState(1)
+  const [_totalPages, _setTotalPages] = useState(1)
   const [selectedPayment, setSelectedPayment] = useState<PendingPayment | null>(null)
   const [showVerificationModal, setShowVerificationModal] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
@@ -75,7 +75,7 @@ const AdminPaymentVerification = () => {
       
       if (response.data.success) {
         setPayments(response.data.data)
-        setTotalPages(response.data.pagination.totalPages)
+        _setTotalPages(response.data.pagination.totalPages)
       }
     } catch (error) {
       console.error('Error fetching pending payments:', error)

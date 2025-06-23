@@ -57,14 +57,9 @@ const AdminSettings = () => {
     }
   }
 
-  const handleProfileUpdate = async (data: ProfileForm) => {
-    try {
-      // Note: In a real app, you'd have an update profile endpoint
-      toast.success('Profile settings saved!')
-     
-    } catch (error) {
-      toast.error('Failed to update profile')
-    }
+  const handleProfileUpdate = async (_data: ProfileForm) => {
+    // TODO: Implement profile update
+    toast.success('Profile update feature coming soon!')
   }
 
   const tabs = [

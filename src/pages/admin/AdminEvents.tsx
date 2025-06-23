@@ -81,7 +81,7 @@ const AdminEvents = () => {
     handleSubmit,
     reset,
     watch,
-    formState: { errors, isSubmitting: formIsSubmitting },
+    formState: { errors },
   } = useForm<EventForm>()
 
   const registrationRequired = watch('registrationRequired')
@@ -222,16 +222,12 @@ const AdminEvents = () => {
       }
 
       console.log('Sending event data:', eventData) // Debug log
-
-      let savedEvent: any;
       
       if (editingEvent) {
-        const response = await eventsApi.update(editingEvent._id, eventData)
-        savedEvent = response.data.data
+        await eventsApi.update(editingEvent._id, eventData)
         toast.success('Event updated successfully')
       } else {
-        const response = await eventsApi.create(eventData)
-        savedEvent = response.data.data
+        await eventsApi.create(eventData)
         toast.success('Event created successfully')
       }
 
