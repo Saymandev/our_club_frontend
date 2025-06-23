@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-// Create axios instance
+// Create axios instances
 const api = axios.create({
   baseURL: 'https://our-club-backend.onrender.com/api',
   timeout: 30000,
