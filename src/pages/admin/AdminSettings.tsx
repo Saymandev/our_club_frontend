@@ -61,7 +61,7 @@ const AdminSettings = () => {
     try {
       // Note: In a real app, you'd have an update profile endpoint
       toast.success('Profile settings saved!')
-      console.log('Profile update:', data)
+     
     } catch (error) {
       toast.error('Failed to update profile')
     }

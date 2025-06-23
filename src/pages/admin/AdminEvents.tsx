@@ -1,4 +1,4 @@
-import { eventsApi } from '@/services/api'
+import { eventsApi, uploadApi } from '@/services/api'
 import { motion } from 'framer-motion'
 import { Calendar, Edit, Plus, Search, Star, ToggleLeft, ToggleRight, Trash2, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -36,6 +36,7 @@ interface Event {
   tags: string[]
   createdAt: string
   updatedAt: string
+  images?: { url: string; publicId: string; filename: string; isMain: boolean }[]
 }
 
 interface EventForm {
@@ -71,13 +72,16 @@ const AdminEvents = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [eventImages, setEventImages] = useState<{ url: string; publicId: string; filename: string; isMain: boolean }[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
     register,
     handleSubmit,
     reset,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting: formIsSubmitting },
   } = useForm<EventForm>()
 
   const registrationRequired = watch('registrationRequired')
@@ -116,23 +120,87 @@ const AdminEvents = () => {
     fetchEvents()
   }, [])
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files)
+      setUploading(true)
+      
+      try {
+        const uploadPromises = files.map(async (file) => {
+          const response = await uploadApi.single(file, 'events')
+          return {
+            url: response.data.data.url,
+            publicId: response.data.data.publicId,
+            filename: response.data.data.filename,
+            isMain: eventImages.length === 0 && files.indexOf(file) === 0 // Set first image as main if no images exist
+          }
+        })
+        
+        const uploadedImages = await Promise.all(uploadPromises)
+        setEventImages([...eventImages, ...uploadedImages])
+        toast.success(`${uploadedImages.length} image(s) uploaded successfully`)
+      } catch (error) {
+        console.error('Error uploading images:', error)
+        toast.error('Failed to upload images')
+      } finally {
+        setUploading(false)
+      }
+    }
+  }
+
   const handleCreateOrUpdate = async (data: EventForm) => {
+    setIsSubmitting(true)
     try {
-      // Validate registration fields if registration is required
-      if (data.registrationRequired && !data.maxParticipants) {
-        toast.error('Max Participants is required when registration is enabled')
+      // Validate dates before submission
+      if (!data.eventDate) {
+        toast.error('Event date is required')
+        setIsSubmitting(false)
         return
       }
 
-      const payload = {
+      const eventDate = new Date(data.eventDate)
+      const now = new Date()
+      
+      if (eventDate <= now) {
+        toast.error('Event date must be in the future')
+        setIsSubmitting(false)
+        return
+      }
+
+      if (data.endDate) {
+        const endDate = new Date(data.endDate)
+        if (endDate <= eventDate) {
+          toast.error('End date must be after event date')
+          setIsSubmitting(false)
+          return
+        }
+      }
+
+      if (data.registrationDeadline && data.registrationRequired) {
+        const regDeadline = new Date(data.registrationDeadline)
+        if (regDeadline >= eventDate) {
+          toast.error('Registration deadline must be before event date')
+          setIsSubmitting(false)
+          return
+        }
+      }
+
+      if (data.registrationRequired && (!data.maxParticipants || Number(data.maxParticipants) < 1)) {
+        toast.error('Maximum participants is required and must be at least 1 when registration is enabled')
+        setIsSubmitting(false)
+        return
+      }
+
+      // Transform form data
+      const eventData = {
         title: data.title,
         description: data.description,
         content: data.content,
-        eventDate: new Date(data.eventDate).toISOString(),
-        endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
+        eventDate: eventDate.toISOString(), // Convert to ISO string
+        endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined, // Convert to ISO string
         location: {
           address: data.locationAddress,
-          coordinates: data.locationLatitude && data.locationLongitude ? {
+          coordinates: (data.locationLatitude && data.locationLongitude) ? {
             latitude: Number(data.locationLatitude),
             longitude: Number(data.locationLongitude)
           } : undefined
@@ -144,46 +212,68 @@ const AdminEvents = () => {
         },
         category: data.category,
         registrationRequired: data.registrationRequired,
-        maxParticipants: data.registrationRequired && data.maxParticipants ? Number(data.maxParticipants) : undefined,
-        registrationDeadline: data.registrationRequired && data.registrationDeadline ? new Date(data.registrationDeadline).toISOString() : undefined,
+        maxParticipants: data.registrationRequired ? Number(data.maxParticipants) : undefined,
+        registrationDeadline: data.registrationDeadline ? new Date(data.registrationDeadline).toISOString() : undefined, // Convert to ISO string
         fee: Number(data.fee) || 0,
         isPublished: data.isPublished,
         isFeatured: data.isFeatured,
-        tags: data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : []
+        tags: data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+        images: eventImages // Include images directly in event data
       }
 
-      console.log('Sending payload:', payload)
+      console.log('Sending event data:', eventData) // Debug log
 
+      let savedEvent: any;
+      
       if (editingEvent) {
-        await eventsApi.update(editingEvent._id, payload)
-        toast.success('Event updated successfully!')
+        const response = await eventsApi.update(editingEvent._id, eventData)
+        savedEvent = response.data.data
+        toast.success('Event updated successfully')
       } else {
-        await eventsApi.create(payload)
-        toast.success('Event created successfully!')
+        const response = await eventsApi.create(eventData)
+        savedEvent = response.data.data
+        toast.success('Event created successfully')
       }
 
+      await fetchEvents()
       setShowModal(false)
       setEditingEvent(null)
+      setEventImages([])
       reset()
-      fetchEvents()
     } catch (error: any) {
-      console.error('Event save error:', error)
-      const errorMessage = error?.response?.data?.message || 
-                          error?.response?.data?.errors?.[0]?.message ||
-                          'Failed to save event'
-      toast.error(errorMessage)
+      console.error('Create/Update event error:', error)
+      console.log('Full error response:', error.response) // Additional debugging
+      
+      if (error.response?.data?.errors) {
+        // Handle validation errors
+        error.response.data.errors.forEach((err: any) => {
+          toast.error(`${err.field}: ${err.message}`)
+        })
+      } else if (error.response?.data?.error) {
+        // Handle other backend errors with detailed error message
+        toast.error(`${error.response.data.message}: ${error.response.data.error}`)
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to save event')
+      }
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleEdit = (event: Event) => {
     setEditingEvent(event)
+    setEventImages(event.images || [])
     
-    // Format datetime properly for datetime-local input
     const formatDateTime = (dateString: string) => {
       const date = new Date(dateString)
-      return date.toISOString().slice(0, 16) // Format: YYYY-MM-DDTHH:mm
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      return `${year}-${month}-${day}T${hours}:${minutes}`
     }
-    
+
     reset({
       title: event.title,
       description: event.description,
@@ -203,7 +293,7 @@ const AdminEvents = () => {
       fee: event.fee,
       isPublished: event.isPublished,
       isFeatured: event.isFeatured,
-      tags: event.tags.join(', ')
+      tags: event.tags?.join(', ') || ''
     })
     setShowModal(true)
   }
@@ -243,6 +333,19 @@ const AdminEvents = () => {
   const handleViewRegistrations = async (event: Event) => {
     setViewingRegistrations(event)
     await fetchRegistrations(event._id)
+  }
+
+  const setMainImage = (index: number) => {
+    const newImages = eventImages.map((image, i) => ({
+      ...image,
+      isMain: i === index
+    }))
+    setEventImages(newImages)
+  }
+
+  const removeImage = (index: number) => {
+    const newImages = eventImages.filter((_, i) => i !== index)
+    setEventImages(newImages)
   }
 
   const filteredEvents = events.filter(event => {
@@ -890,12 +993,111 @@ const AdminEvents = () => {
                   </div>
                 </div>
 
+                {/* Images Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Event Images</h3>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Upload Images
+                      </label>
+                      <div className="flex items-center space-x-4">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleImageUpload}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                        {uploading && (
+                          <div className="text-sm text-blue-600">Uploading...</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Image Preview Grid */}
+                    {eventImages.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {eventImages.map((image, index) => (
+                          <div key={index} className="relative group">
+                            <div className="relative">
+                              <img
+                                src={image.url}
+                                alt={`Event image ${index + 1}`}
+                                className={`w-full h-32 object-cover rounded-lg border-2 transition-all ${
+                                  image.isMain 
+                                    ? 'border-blue-500 ring-2 ring-blue-200' 
+                                    : 'border-gray-200 dark:border-gray-600'
+                                }`}
+                              />
+                              
+                              {/* Main image badge */}
+                              {image.isMain && (
+                                <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                                  Main
+                                </div>
+                              )}
+                              
+                              {/* Action buttons */}
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center space-x-2 opacity-0 group-hover:opacity-100">
+                                {!image.isMain && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setMainImage(index)}
+                                    className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition-colors"
+                                    title="Set as main image"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                    </svg>
+                                  </button>
+                                )}
+                                
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(index)}
+                                  className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors"
+                                  title="Remove image"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                            
+                            <div className="mt-2 text-center">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                {image.filename}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {eventImages.length === 0 && (
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                        <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-gray-500 dark:text-gray-400">No images uploaded</p>
+                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                          Images make events more attractive and get more participants
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                   <button
                     type="button"
                     onClick={() => {
                       setShowModal(false)
                       setEditingEvent(null)
+                      setEventImages([])
                       reset()
                     }}
                     className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:ring-2 focus:ring-gray-500"
@@ -970,13 +1172,15 @@ const AdminEvents = () => {
                     <button
                       onClick={() => {
                         const csvContent = [
-                          ['Name', 'Phone', 'Email', 'Registration Date', 'Status'].join(','),
+                          ['Name', 'Phone', 'Email', 'Registration Date', 'Status', 'Payment Status', 'Transaction ID'].join(','),
                           ...registrations.map(reg => [
                             reg.participantName,
                             reg.participantPhone,
                             reg.participantEmail || '',
                             new Date(reg.registrationDate).toLocaleDateString(),
-                            reg.status
+                            reg.status,
+                            reg.paymentStatus || 'N/A',
+                            reg.paymentInfo?.transactionId || 'N/A'
                           ].join(','))
                         ].join('\n')
                         
@@ -1010,12 +1214,15 @@ const AdminEvents = () => {
                               Registration Date
                             </th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                              Payment
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                               Status
                             </th>
                           </tr>
                         </thead>
                         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                          {registrations.map((registration, index) => (
+                          {registrations.map((registration) => (
                             <tr key={registration._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                               <td className="px-4 py-4">
                                 <div>
@@ -1041,6 +1248,24 @@ const AdminEvents = () => {
                               </td>
                               <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
                                 {new Date(registration.registrationDate).toLocaleDateString()}
+                              </td>
+                              <td className="px-4 py-4">
+                                <div className="text-sm">
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                    registration.paymentStatus === 'paid' 
+                                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                      : registration.paymentStatus === 'pending'
+                                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                                  }`}>
+                                    {registration.paymentStatus || 'N/A'}
+                                  </span>
+                                  {registration.paymentInfo?.transactionId && (
+                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                      TXN: {registration.paymentInfo.transactionId}
+                                    </div>
+                                  )}
+                                </div>
                               </td>
                               <td className="px-4 py-4">
                                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -1091,6 +1316,20 @@ const AdminEvents = () => {
                             <p>Email: {registration.participantEmail}</p>
                           )}
                           <p>Registered: {new Date(registration.registrationDate).toLocaleDateString()}</p>
+                          <p>Payment: 
+                            <span className={`ml-1 px-2 py-1 text-xs font-semibold rounded-full ${
+                              registration.paymentStatus === 'paid' 
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                                : registration.paymentStatus === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                                : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                            }`}>
+                              {registration.paymentStatus || 'N/A'}
+                            </span>
+                          </p>
+                          {registration.paymentInfo?.transactionId && (
+                            <p className="text-xs">TXN: {registration.paymentInfo.transactionId}</p>
+                          )}
                         </div>
                       </div>
                     ))}

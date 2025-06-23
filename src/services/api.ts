@@ -2,8 +2,8 @@ import axios from 'axios'
 
 // Create axios instance
 const api = axios.create({
-  baseURL: 'http://localhost:5001/api',
-  timeout: 10000,
+  baseURL: 'https://our-club-backend.onrender.com/api',
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -237,6 +237,15 @@ export const eventsApi = {
     participantName: string;
     participantPhone: string;
     participantEmail?: string;
+    paymentInfo?: {
+      transactionId?: string;
+      paymentMethod?: string;
+      receiptImage?: {
+        url: string;
+        publicId: string;
+        filename: string;
+      };
+    };
   }) => api.post(`/events/${eventId}/register`, participantData),
   
   // Admin routes
@@ -250,11 +259,18 @@ export const eventsApi = {
   getStats: () => api.get('/events/admin/stats'),
   create: (data: any) => api.post('/events/admin', data),
   update: (id: string, data: any) => api.put(`/events/admin/${id}`, data),
+  updateImages: (id: string, images: any[]) => api.put(`/events/admin/${id}/images`, { images }),
   delete: (id: string) => api.delete(`/events/admin/${id}`),
   togglePublish: (id: string) => api.patch(`/events/admin/${id}/publish`),
   toggleFeature: (id: string) => api.patch(`/events/admin/${id}/feature`),
   getEventRegistrations: (eventId: string, params?: any) => 
     api.get(`/events/admin/${eventId}/registrations`, { params }),
+  
+  // Payment verification routes (admin only)
+  getPendingPayments: (params?: { page?: number; limit?: number }) =>
+    api.get('/events/admin/payments/pending', { params }),
+  verifyPayment: (registrationId: string, data: { status: 'verified' | 'rejected'; note?: string }) =>
+    api.patch(`/events/admin/payments/${registrationId}/verify`, data),
 }
 
 export default api 

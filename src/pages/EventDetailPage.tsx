@@ -1,5 +1,5 @@
 import LoadingSpinner from '@/components/UI/LoadingSpinner'
-import { eventsApi } from '@/services/api'
+import { donationApi, eventsApi, uploadApi } from '@/services/api'
 import { useAuthStore } from '@/store/authStore'
 import { motion } from 'framer-motion'
 import {
@@ -7,7 +7,10 @@ import {
   ArrowLeft,
   Calendar,
   CheckCircle,
+  ChevronLeft,
+  ChevronRight,
   DollarSign,
+  FileImage,
   Mail,
   MapPin,
   Phone,
@@ -19,19 +22,21 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 interface RegistrationForm {
   participantName: string
   participantPhone: string
   participantEmail?: string
+  paymentMethod?: string
+  transactionId?: string
 }
 
 const EventDetailPage = () => {
   const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
   const { user } = useAuthStore()
   const [event, setEvent] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -39,17 +44,25 @@ const EventDetailPage = () => {
   const [error, setError] = useState<string>('')
   const [success, setSuccess] = useState<string>('')
   const [showRegistrationForm, setShowRegistrationForm] = useState(false)
+  const [donationSettings, setDonationSettings] = useState<any>(null)
+  const [receiptImage, setReceiptImage] = useState<any>(null)
+  const [uploadingReceipt, setUploadingReceipt] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors }
   } = useForm<RegistrationForm>()
+
+  const paymentMethod = watch('paymentMethod')
 
   useEffect(() => {
     if (id) {
       fetchEvent()
+      fetchDonationSettings()
     }
   }, [id])
 
@@ -66,11 +79,14 @@ const EventDetailPage = () => {
 
   const fetchEvent = async () => {
     setIsLoading(true)
+    setError('') // Clear any previous errors
     try {
       const response = await eventsApi.getById(id!)
       if (response.data.success) {
+        
         setEvent(response.data.data)
       } else {
+        console.error('Event fetch failed:', response.data)
         setError(t('eventDetailPage.eventNotFound'))
       }
     } catch (error) {
@@ -81,20 +97,72 @@ const EventDetailPage = () => {
     }
   }
 
+  const fetchDonationSettings = async () => {
+    try {
+      const response = await donationApi.getSettings()
+      setDonationSettings(response.data.data)
+    } catch (error) {
+      console.error('Error fetching donation settings:', error)
+    }
+  }
+
+  const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      setUploadingReceipt(true)
+      
+      try {
+        const response = await uploadApi.single(file, 'receipts')
+        setReceiptImage({
+          url: response.data.data.url,
+          publicId: response.data.data.publicId,
+          filename: response.data.data.filename
+        })
+        toast.success('Receipt uploaded successfully')
+      } catch (error) {
+        console.error('Error uploading receipt:', error)
+        toast.error('Failed to upload receipt')
+      } finally {
+        setUploadingReceipt(false)
+      }
+    }
+  }
+
   const handleRegister = async (data: RegistrationForm) => {
     setIsRegistering(true)
     setError('')
     setSuccess('')
 
     try {
-      const response = await eventsApi.registerForEvent(id!, {
+      const registrationData: any = {
         participantName: data.participantName,
         participantPhone: data.participantPhone,
         participantEmail: data.participantEmail
-      })
+      }
+
+      // Add payment info for paid events
+      if (event.fee > 0) {
+        if (!data.paymentMethod || !data.transactionId) {
+          setError('Payment method and transaction ID are required for paid events')
+          setIsRegistering(false)
+          return
+        }
+
+        registrationData.paymentInfo = {
+          paymentMethod: data.paymentMethod,
+          transactionId: data.transactionId,
+          receiptImage: receiptImage
+        }
+      }
+
+      const response = await eventsApi.registerForEvent(id!, registrationData)
       
       if (response.data.success) {
-        setSuccess(t('eventDetailPage.registrationSuccess'))
+        setSuccess(
+          event.fee > 0 
+            ? 'Registration submitted successfully! Your payment will be verified shortly.'
+            : 'Successfully registered for the event!'
+        )
         setShowRegistrationForm(false)
         await fetchEvent()
       }
@@ -104,6 +172,43 @@ const EventDetailPage = () => {
     } finally {
       setIsRegistering(false)
     }
+  }
+
+  const getPaymentMethods = () => {
+    if (!donationSettings) return []
+    
+    const methods = []
+    
+    // Mobile banking options
+    Object.entries(donationSettings.mobileBanking).forEach(([key, service]: [string, any]) => {
+      if (service.enabled) {
+        methods.push({
+          value: key,
+          label: key === 'bkash' ? 'bKash' : key.charAt(0).toUpperCase() + key.slice(1),
+          number: service.number,
+          type: service.type,
+          instructions: service.instructions
+        })
+      }
+    })
+    
+    // Bank transfer
+    if (donationSettings.bankAccount.enabled) {
+      methods.push({
+        value: 'bank_transfer',
+        label: 'Bank Transfer',
+        number: donationSettings.bankAccount.accountNumber,
+        type: 'Bank Account',
+        instructions: `Transfer to ${donationSettings.bankAccount.bankName}, Account: ${donationSettings.bankAccount.accountNumber}`
+      })
+    }
+    
+    return methods
+  }
+
+  const getSelectedPaymentInfo = () => {
+    if (!paymentMethod) return null
+    return getPaymentMethods().find(method => method.value === paymentMethod)
   }
 
   const getCategoryColor = (category: string) => {
@@ -141,6 +246,58 @@ const EventDetailPage = () => {
       hour: '2-digit',
       minute: '2-digit'
     })
+  }
+
+  const nextImage = () => {
+    if (event?.images && event.images.length > 1) {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === event.images.length - 1 ? 0 : prevIndex + 1
+      )
+    }
+  }
+
+  const prevImage = () => {
+    if (event?.images && event.images.length > 1) {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === 0 ? event.images.length - 1 : prevIndex - 1
+      )
+    }
+  }
+
+  // Reset image index when event changes and ensure it's within bounds
+  useEffect(() => {
+    if (event?.images && event.images.length > 0) {
+      setCurrentImageIndex(0)
+    }
+  }, [event])
+
+  // Safety check for currentImageIndex
+  const safeImageIndex = event?.images && event.images.length > 0 
+    ? Math.min(currentImageIndex, event.images.length - 1)
+    : 0
+
+  // Helper function to safely check if registration is open
+  const isRegistrationOpen = () => {
+    if (!event || !event.registrationRequired || event.status !== 'upcoming') {
+      return false
+    }
+    
+    // Check if registration is explicitly closed
+    if (event.isRegistrationOpen === false) {
+      return false
+    }
+    
+    // Check capacity
+    if (event.maxParticipants && event.currentParticipants >= event.maxParticipants) {
+      return false
+    }
+    
+    // Check deadline
+    if (event.registrationDeadline && new Date() > new Date(event.registrationDeadline)) {
+      return false
+    }
+    
+    return true
   }
 
   if (isLoading) {
@@ -197,14 +354,39 @@ const EventDetailPage = () => {
           transition={{ duration: 0.6 }}
           className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden"
         >
-          {event.images && event.images.length > 0 && (
+          {event.images && Array.isArray(event.images) && event.images.length > 0 && (
             <div className="relative h-64 md:h-80">
               <img
-                src={event.images.find((img: any) => img.isMain)?.url || event.images[0]?.url}
+                src={event.images[safeImageIndex]?.url}
                 alt={event.title}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black bg-opacity-40" />
+              
+              {/* Navigation arrows for multiple images */}
+              {event.images.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors backdrop-blur-sm z-20"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors backdrop-blur-sm z-20"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </>
+              )}
+
+              {/* Image counter */}
+              {event.images.length > 1 && (
+                <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+                  {safeImageIndex + 1} / {event.images.length}
+                </div>
+              )}
               
               <div className="absolute top-4 left-4 flex gap-2">
                 <span className={`px-3 py-1 text-sm font-medium rounded-full ${getCategoryColor(event.category)}`}>
@@ -229,6 +411,41 @@ const EventDetailPage = () => {
             </div>
           )}
 
+          {/* Image Thumbnail Gallery */}
+          {event.images && Array.isArray(event.images) && event.images.length > 1 && (
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+              <div className="p-4">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Event Gallery ({event.images.length} images)
+                </h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                  {event.images.map((image: any, index: number) => (
+                    <div
+                      key={index}
+                      className={`relative cursor-pointer rounded-lg overflow-hidden aspect-square ${
+                        index === safeImageIndex 
+                          ? 'ring-4 ring-blue-500' 
+                          : 'hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600'
+                      }`}
+                      onClick={() => setCurrentImageIndex(index)}
+                    >
+                      <img
+                        src={image.url}
+                        alt={`${event.title} - Image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {image.isMain && (
+                        <div className="absolute top-1 left-1 bg-blue-500 text-white px-1 py-0.5 rounded text-xs font-medium">
+                          Main
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="space-y-4">
@@ -245,11 +462,11 @@ const EventDetailPage = () => {
                 <div className="flex items-start text-gray-700 dark:text-gray-300">
                   <MapPin className="w-5 h-5 mr-3 mt-1 text-primary-600 dark:text-primary-400 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">{event.location.address}</p>
+                    <p className="font-medium">{event.location?.address || 'Location not specified'}</p>
                   </div>
                 </div>
 
-                {event.fee > 0 && (
+                {event.fee && event.fee > 0 && (
                   <div className="flex items-center text-gray-700 dark:text-gray-300">
                     <DollarSign className="w-5 h-5 mr-3 text-primary-600 dark:text-primary-400" />
                     <div>
@@ -268,7 +485,7 @@ const EventDetailPage = () => {
                     <Users className="w-5 h-5 mr-3 text-primary-600 dark:text-primary-400" />
                     <div>
                       <p className="font-medium">
-                        {event.currentParticipants}
+                        {event.currentParticipants || 0}
                         {event.maxParticipants && `/${event.maxParticipants}`} {t('eventDetailPage.participants')}
                       </p>
                     </div>
@@ -334,7 +551,7 @@ const EventDetailPage = () => {
                   </motion.div>
                 )}
 
-                {event.isRegistrationOpen ? (
+                {isRegistrationOpen() ? (
                   <div>
                     {!showRegistrationForm ? (
                       <motion.div
@@ -457,24 +674,136 @@ const EventDetailPage = () => {
                         </div>
 
                         {event.fee > 0 && (
-                          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
-                            <div className="flex items-center">
-                              <DollarSign className="w-5 h-5 text-amber-600 dark:text-amber-400 mr-2" />
-                              <span className="text-amber-800 dark:text-amber-300 font-medium">
-                                Registration Fee: ৳{event.fee}
-                              </span>
+                          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+                            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                              <DollarSign className="w-5 h-5 mr-2 text-amber-600 dark:text-amber-400" />
+                              Payment Information
+                            </h4>
+                            
+                            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-amber-800 dark:text-amber-300 font-medium">
+                                  Registration Fee: ৳{event.fee}
+                                </span>
+                              </div>
+                              <p className="text-amber-700 dark:text-amber-400 text-sm">
+                                Please complete the payment and provide transaction details below.
+                              </p>
                             </div>
-                            <p className="text-amber-700 dark:text-amber-400 text-sm mt-1">
-                              Payment will be collected at the event venue.
-                            </p>
+
+                            {/* Payment Method Selection */}
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Payment Method *
+                              </label>
+                              <select
+                                {...register('paymentMethod', { required: 'Payment method is required' })}
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                              >
+                                <option value="">Select payment method</option>
+                                {getPaymentMethods().map((method) => (
+                                  <option key={method.value} value={method.value}>
+                                    {method.label} ({method.type})
+                                  </option>
+                                ))}
+                              </select>
+                              {errors.paymentMethod && (
+                                <p className="text-red-500 text-sm mt-1 flex items-center">
+                                  <AlertCircle className="w-3 h-3 mr-1" />
+                                  {errors.paymentMethod.message}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Payment Instructions */}
+                            {paymentMethod && getSelectedPaymentInfo() && (
+                              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                                <h5 className="font-medium text-blue-800 dark:text-blue-300 mb-2">
+                                  Payment Instructions for {getSelectedPaymentInfo()?.label}
+                                </h5>
+                                <div className="text-blue-700 dark:text-blue-400 text-sm space-y-1">
+                                  <p><strong>Number:</strong> {getSelectedPaymentInfo()?.number}</p>
+                                  <p><strong>Instructions:</strong> {getSelectedPaymentInfo()?.instructions}</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Transaction ID */}
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Transaction ID *
+                              </label>
+                              <input
+                                {...register('transactionId', { 
+                                  required: 'Transaction ID is required',
+                                  minLength: { value: 3, message: 'Transaction ID must be at least 3 characters' }
+                                })}
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                placeholder="Enter transaction ID from your payment"
+                              />
+                              {errors.transactionId && (
+                                <p className="text-red-500 text-sm mt-1 flex items-center">
+                                  <AlertCircle className="w-3 h-3 mr-1" />
+                                  {errors.transactionId.message}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Receipt Upload */}
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Payment Receipt (Optional)
+                              </label>
+                              <div className="space-y-3">
+                                <div className="flex items-center space-x-4">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleReceiptUpload}
+                                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                  />
+                                  {uploadingReceipt && (
+                                    <div className="text-sm text-blue-600 flex items-center">
+                                      <LoadingSpinner size="sm" />
+                                      <span className="ml-2">Uploading...</span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {receiptImage && (
+                                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                                    <div className="flex items-center text-green-800 dark:text-green-300">
+                                      <FileImage className="w-4 h-4 mr-2" />
+                                      <span className="text-sm font-medium">Receipt uploaded successfully</span>
+                                    </div>
+                                    <p className="text-green-700 dark:text-green-400 text-xs mt-1">
+                                      {receiptImage.filename}
+                                    </p>
+                                  </div>
+                                )}
+                                
+                                <p className="text-gray-500 dark:text-gray-400 text-xs">
+                                  Upload a screenshot of your payment confirmation for faster verification
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-sm text-gray-600 dark:text-gray-400">
+                              <p className="font-medium mb-1">Important Notes:</p>
+                              <ul className="list-disc list-inside space-y-1 text-xs">
+                                <li>Your registration will be pending until payment is verified</li>
+                                <li>You will receive confirmation once payment is verified by admin</li>
+                                <li>Keep your transaction ID safe for reference</li>
+                              </ul>
+                            </div>
                           </div>
                         )}
 
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 mt-4">
                           <button
                             type="submit"
                             disabled={isRegistering}
-                            className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex-1 group"
+                            className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex-1 group items-center "
                           >
                             {isRegistering ? (
                               <>
@@ -482,10 +811,10 @@ const EventDetailPage = () => {
                                 <span className="ml-2">{t('eventDetailPage.registering')}</span>
                               </>
                             ) : (
-                              <>
+                              <div className="flex items-center justify-center">
                                 <CheckCircle className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
                                 {t('eventDetailPage.confirmRegistration')}
-                              </>
+                              </div>
                             )}
                           </button>
                           <button

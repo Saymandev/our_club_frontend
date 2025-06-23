@@ -55,7 +55,7 @@ const Header = () => {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'px-2 2xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 whitespace-nowrap',
+                  'px-1 py-2 rounded-md text-sm font-medium transition-colors duration-200 whitespace-nowrap',
                   isActivePath(item.href)
                     ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
                     : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
