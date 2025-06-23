@@ -2,14 +2,14 @@ import LoadingSpinner from '@/components/UI/LoadingSpinner'
 import { eventsApi } from '@/services/api'
 import { motion } from 'framer-motion'
 import {
-    AlertCircle,
-    CheckCircle,
-    CreditCard,
-    Eye,
-    FileImage,
-    Search,
-    X,
-    XCircle
+  AlertCircle,
+  CheckCircle,
+  CreditCard,
+  Eye,
+  FileImage,
+  Search,
+  X,
+  XCircle
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -148,9 +148,9 @@ const AdminPaymentVerification = () => {
           </div>
           
           <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg px-4 py-2">
-            <div className="flex items-center text-white">
+            <div className="flex items-center text-white ">
               <CreditCard className="w-5 h-5 mr-2" />
-              <div className="text-right">
+              <div className="text-right flex items-center gap-2">
                 <div className="text-sm opacity-90">Pending Payments</div>
                 <div className="text-xl font-bold">{payments.length}</div>
               </div>

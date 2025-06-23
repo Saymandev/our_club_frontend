@@ -2,20 +2,21 @@ import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils/cn'
 import {
-    Calendar,
-    Camera,
-    Droplets,
-    Heart,
-    Home,
-    ImageIcon,
-    LogOut,
-    Megaphone,
-    Menu,
-    Moon,
-    Settings,
-    Sun,
-    User,
-    X
+  Calendar,
+  Camera,
+  CreditCard,
+  Droplets,
+  Heart,
+  Home,
+  ImageIcon,
+  LogOut,
+  Megaphone,
+  Menu,
+  Moon,
+  Settings,
+  Sun,
+  User,
+  X
 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -38,6 +39,7 @@ const AdminLayout = () => {
     { name: 'Slider Management', href: '/admin/slider', icon: ImageIcon },
     { name: t('bloodDonation.adminTitle'), href: '/admin/blood-donation', icon: Droplets },
     { name: 'Donation Settings', href: '/admin/donations', icon: Heart },
+    { name: 'Payment Verification', href: '/admin/payment-verification', icon: CreditCard },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ]
 

@@ -1248,7 +1248,7 @@ const AdminEvents = () => {
                               <td className="px-4 py-4">
                                 <div className="text-sm">
                                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                    registration.paymentStatus === 'paid' 
+                                    registration.paymentStatus === 'confirmed' 
                                       ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
                                       : registration.paymentStatus === 'pending'
                                       ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
@@ -1314,7 +1314,7 @@ const AdminEvents = () => {
                           <p>Registered: {new Date(registration.registrationDate).toLocaleDateString()}</p>
                           <p>Payment: 
                             <span className={`ml-1 px-2 py-1 text-xs font-semibold rounded-full ${
-                              registration.paymentStatus === 'paid' 
+                              registration.paymentStatus === 'confirmed' 
                                 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
                                 : registration.paymentStatus === 'pending'
                                 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'

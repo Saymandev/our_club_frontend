@@ -28,6 +28,7 @@ import AdminDashboard from '@/pages/admin/AdminDashboard'
 import AdminDonations from '@/pages/admin/AdminDonations'
 import AdminEvents from '@/pages/admin/AdminEvents'
 import AdminHistoricalMoments from '@/pages/admin/AdminHistoricalMoments'
+import AdminPaymentVerification from '@/pages/admin/AdminPaymentVerification'
 import AdminSettings from '@/pages/admin/AdminSettings'
 import AdminSlider from '@/pages/admin/AdminSlider'
 
@@ -95,7 +96,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="admin">
               <AdminLayout />
             </ProtectedRoute>
           }
@@ -107,6 +108,7 @@ function App() {
           <Route path="slider" element={<AdminSlider />} />
           <Route path="blood-donation" element={<AdminBloodDonation />} />
           <Route path="donations" element={<AdminDonations />} />
+          <Route path="payment-verification" element={<AdminPaymentVerification />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
