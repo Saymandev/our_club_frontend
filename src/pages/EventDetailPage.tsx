@@ -14,6 +14,7 @@ import {
   Mail,
   MapPin,
   Phone,
+  Share2,
   Star,
   Tag,
   User,
@@ -118,12 +119,41 @@ const EventDetailPage = () => {
           publicId: response.data.data.publicId,
           filename: response.data.data.filename
         })
-        toast.success('Receipt uploaded successfully')
+        toast.success(t('eventDetailPage.receiptUploaded'))
       } catch (error) {
         console.error('Error uploading receipt:', error)
         toast.error('Failed to upload receipt')
       } finally {
         setUploadingReceipt(false)
+      }
+    }
+  }
+
+  const handleShare = async () => {
+    const url = window.location.href
+    const title = event?.title || 'Event'
+    const text = `${title} - ${event?.description || ''}`
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text,
+          url
+        })
+        toast.success(t('common.shareSuccessful'))
+      } catch (error) {
+        if (error instanceof Error && error.name !== 'AbortError') {
+          toast.error(t('common.shareFailed'))
+        }
+      }
+    } else {
+      // Fallback: copy link to clipboard
+      try {
+        await navigator.clipboard.writeText(url)
+        toast.success(t('common.linkCopied'))
+      } catch (error) {
+        toast.error(t('common.linkCopyFailed'))
       }
     }
   }
@@ -337,7 +367,7 @@ const EventDetailPage = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-6"
+          className="mb-6 flex items-center justify-between"
         >
           <Link
             to="/events"
@@ -346,6 +376,15 @@ const EventDetailPage = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t('eventDetailPage.backToEvents')}
           </Link>
+          
+          {/* Share Button */}
+          <button
+            onClick={handleShare}
+            className="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+          >
+            <Share2 className="w-4 h-4 mr-2" />
+            {t('common.share')}
+          </button>
         </motion.div>
 
         <motion.div
@@ -416,7 +455,7 @@ const EventDetailPage = () => {
             <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
               <div className="p-4">
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Event Gallery ({event.images.length} images)
+                  {t('eventDetailPage.eventGallery')} ({t('eventDetailPage.imagesCount', { count: event.images.length })})
                 </h3>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                   {event.images.map((image: any, index: number) => (
@@ -436,7 +475,7 @@ const EventDetailPage = () => {
                       />
                       {image.isMain && (
                         <div className="absolute top-1 left-1 bg-blue-500 text-white px-1 py-0.5 rounded text-xs font-medium">
-                          Main
+                          {t('eventDetailPage.mainImage')}
                         </div>
                       )}
                     </div>
@@ -462,7 +501,7 @@ const EventDetailPage = () => {
                 <div className="flex items-start text-gray-700 dark:text-gray-300">
                   <MapPin className="w-5 h-5 mr-3 mt-1 text-primary-600 dark:text-primary-400 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">{event.location?.address || 'Location not specified'}</p>
+                    <p className="font-medium">{event.location?.address || t('eventDetailPage.locationNotSpecified')}</p>
                   </div>
                 </div>
 
@@ -561,9 +600,9 @@ const EventDetailPage = () => {
                       >
                         <div className="bg-white dark:bg-gray-700 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-600">
                           <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Event Capacity</span>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('eventDetailPage.eventCapacity')}</span>
                             <span className="text-sm text-gray-500 dark:text-gray-400">
-                              {event.currentParticipants}{event.maxParticipants && `/${event.maxParticipants}`} registered
+                              {event.currentParticipants}{event.maxParticipants && `/${event.maxParticipants}`} {t('eventDetailPage.registered')}
                             </span>
                           </div>
                           {event.maxParticipants && (
@@ -677,30 +716,30 @@ const EventDetailPage = () => {
                           <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
                             <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
                               <DollarSign className="w-5 h-5 mr-2 text-amber-600 dark:text-amber-400" />
-                              Payment Information
+                              {t('eventDetailPage.paymentInformation')}
                             </h4>
                             
                             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-amber-800 dark:text-amber-300 font-medium">
-                                  Registration Fee: ৳{event.fee}
+                                  {t('eventDetailPage.registrationFee')}: ৳{event.fee}
                                 </span>
                               </div>
                               <p className="text-amber-700 dark:text-amber-400 text-sm">
-                                Please complete the payment and provide transaction details below.
+                                {t('eventDetailPage.paymentInstructions')}
                               </p>
                             </div>
 
                             {/* Payment Method Selection */}
                             <div className="mb-4">
                               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Payment Method *
+                                {t('eventDetailPage.paymentMethod')} *
                               </label>
                               <select
-                                {...register('paymentMethod', { required: 'Payment method is required' })}
+                                {...register('paymentMethod', { required: t('eventDetailPage.paymentMethodRequired') })}
                                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                               >
-                                <option value="">Select payment method</option>
+                                <option value="">{t('eventDetailPage.selectPaymentMethod')}</option>
                                 {getPaymentMethods().map((method) => (
                                   <option key={method.value} value={method.value}>
                                     {method.label} ({method.type})
@@ -719,11 +758,11 @@ const EventDetailPage = () => {
                             {paymentMethod && getSelectedPaymentInfo() && (
                               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
                                 <h5 className="font-medium text-blue-800 dark:text-blue-300 mb-2">
-                                  Payment Instructions for {getSelectedPaymentInfo()?.label}
+                                  {t('eventDetailPage.paymentInstructionsFor', { method: getSelectedPaymentInfo()?.label })}
                                 </h5>
                                 <div className="text-blue-700 dark:text-blue-400 text-sm space-y-1">
-                                  <p><strong>Number:</strong> {getSelectedPaymentInfo()?.number}</p>
-                                  <p><strong>Instructions:</strong> {getSelectedPaymentInfo()?.instructions}</p>
+                                  <p><strong>{t('eventDetailPage.paymentNumber')}:</strong> {getSelectedPaymentInfo()?.number}</p>
+                                  <p><strong>{t('eventDetailPage.paymentInstructionsText')}:</strong> {getSelectedPaymentInfo()?.instructions}</p>
                                 </div>
                               </div>
                             )}
@@ -731,15 +770,15 @@ const EventDetailPage = () => {
                             {/* Transaction ID */}
                             <div className="mb-4">
                               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Transaction ID *
+                                {t('eventDetailPage.transactionId')} *
                               </label>
                               <input
                                 {...register('transactionId', { 
-                                  required: 'Transaction ID is required',
-                                  minLength: { value: 3, message: 'Transaction ID must be at least 3 characters' }
+                                  required: t('eventDetailPage.transactionIdRequired'),
+                                  minLength: { value: 3, message: t('eventDetailPage.transactionIdMinLength') }
                                 })}
                                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                placeholder="Enter transaction ID from your payment"
+                                placeholder={t('eventDetailPage.enterTransactionId')}
                               />
                               {errors.transactionId && (
                                 <p className="text-red-500 text-sm mt-1 flex items-center">
@@ -752,7 +791,7 @@ const EventDetailPage = () => {
                             {/* Receipt Upload */}
                             <div className="mb-4">
                               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Payment Receipt (Optional)
+                                {t('eventDetailPage.paymentReceiptOptional')}
                               </label>
                               <div className="space-y-3">
                                 <div className="flex items-center space-x-4">
@@ -765,7 +804,7 @@ const EventDetailPage = () => {
                                   {uploadingReceipt && (
                                     <div className="text-sm text-blue-600 flex items-center">
                                       <LoadingSpinner size="sm" />
-                                      <span className="ml-2">Uploading...</span>
+                                      <span className="ml-2">{t('eventDetailPage.uploading')}</span>
                                     </div>
                                   )}
                                 </div>
@@ -774,7 +813,7 @@ const EventDetailPage = () => {
                                   <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
                                     <div className="flex items-center text-green-800 dark:text-green-300">
                                       <FileImage className="w-4 h-4 mr-2" />
-                                      <span className="text-sm font-medium">Receipt uploaded successfully</span>
+                                      <span className="text-sm font-medium">{t('eventDetailPage.receiptUploaded')}</span>
                                     </div>
                                     <p className="text-green-700 dark:text-green-400 text-xs mt-1">
                                       {receiptImage.filename}
@@ -783,17 +822,17 @@ const EventDetailPage = () => {
                                 )}
                                 
                                 <p className="text-gray-500 dark:text-gray-400 text-xs">
-                                  Upload a screenshot of your payment confirmation for faster verification
+                                  {t('eventDetailPage.uploadReceipt')}
                                 </p>
                               </div>
                             </div>
 
                             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-sm text-gray-600 dark:text-gray-400">
-                              <p className="font-medium mb-1">Important Notes:</p>
+                              <p className="font-medium mb-1">{t('eventDetailPage.importantNotes')}</p>
                               <ul className="list-disc list-inside space-y-1 text-xs">
-                                <li>Your registration will be pending until payment is verified</li>
-                                <li>You will receive confirmation once payment is verified by admin</li>
-                                <li>Keep your transaction ID safe for reference</li>
+                                <li>{t('eventDetailPage.paymentNote1')}</li>
+                                <li>{t('eventDetailPage.paymentNote2')}</li>
+                                <li>{t('eventDetailPage.paymentNote3')}</li>
                               </ul>
                             </div>
                           </div>
