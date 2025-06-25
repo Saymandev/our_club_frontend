@@ -35,6 +35,7 @@ import AdminSlider from '@/pages/admin/AdminSlider'
 // Components
 import ProtectedRoute from '@/components/Auth/ProtectedRoute'
 import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { OfflineBanner } from '@/components/UI/OfflineBanner'
 
 function App() {
   const { theme, initializeTheme } = useThemeStore()
@@ -64,6 +65,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      <OfflineBanner />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Layout />}>

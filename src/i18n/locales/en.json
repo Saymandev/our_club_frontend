@@ -28,6 +28,10 @@
     "shareNotSupported": "Sharing is not supported on this device",
     "loginRequired": "Please log in to perform this action"
   },
+  "offline": {
+    "message": "You are offline. Showing cached content.",
+    "backOnline": "Back online!"
+  },
   "header": {
     "clubName": "Adhare Alor Projonmo",
     "toggleTheme": "Toggle theme",

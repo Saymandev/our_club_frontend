@@ -1,4 +1,5 @@
 import axios from 'axios'
+import toast from 'react-hot-toast'
 
 // Create axios instances
 const api = axios.create({
@@ -8,6 +9,17 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 })
+
+// Offline error handler
+const handleOfflineError = (error: any) => {
+  if (!navigator.onLine) {
+    // Don't show error toast for offline, just log it
+    console.log('Offline - using cached data if available')
+    return Promise.resolve({ data: null, isOffline: true })
+  }
+  return Promise.reject(error)
+}
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
@@ -22,6 +34,15 @@ api.interceptors.request.use(
         // Ignore token parsing errors
       }
     }
+
+    // Add cache-busting for API calls when online
+    if (navigator.onLine && config.method === 'get') {
+      config.params = {
+        ...config.params,
+        _t: Date.now()
+      }
+    }
+
     return config
   },
   (error) => {
@@ -33,6 +54,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Handle offline errors first
+    if (!navigator.onLine) {
+      return handleOfflineError(error)
+    }
+
+    // Handle network errors
+    if (error.code === 'NETWORK_ERROR' || error.code === 'ECONNABORTED') {
+      console.log('Network error - may be offline')
+      return handleOfflineError(error)
+    }
+
     if (error.response?.status === 401) {
       // Only redirect to login for admin routes or when user is authenticated
       const currentPath = window.location.pathname
@@ -46,10 +78,34 @@ api.interceptors.response.use(
       if (isAdminRoute && !isAuthRoute) {
         window.location.href = '/login'
       }
-    } 
+    }
+
+    // Handle server errors gracefully
+    if (error.response?.status >= 500) {
+      if (navigator.onLine) {
+        toast.error('Server error. Please try again later.')
+      }
+    }
+    
     return Promise.reject(error)
   }
 )
+
+// Offline-aware API wrapper
+const createOfflineAwareAPI = (apiFunction: Function) => {
+  return async (...args: any[]) => {
+    try {
+      const result = await apiFunction(...args)
+      return result
+    } catch (error: any) {
+      if (!navigator.onLine || error?.code === 'NETWORK_ERROR') {
+        // Return a special offline indicator
+        return { data: null, isOffline: true, error: 'offline' }
+      }
+      throw error
+    }
+  }
+}
 
 // Auth API
 export const authApi = {
@@ -65,26 +121,26 @@ export const authApi = {
   }) =>
     api.post('/auth/register', data),
   logout: () => api.post('/auth/logout'),
-  getMe: () => api.get('/auth/me'),
+  getMe: createOfflineAwareAPI(() => api.get('/auth/me')),
   updatePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.put('/auth/update-password', data),
 }
 
 // Announcements API
 export const announcementsApi = {
-  getAll: (params?: {
+  getAll: createOfflineAwareAPI((params?: {
     page?: number
     limit?: number
     priority?: string
     tags?: string
-  }) => api.get('/announcements', { params }),
-  getById: (id: string) => api.get(`/announcements/${id}`),
-  getAllAdmin: (params?: {
+  }) => api.get('/announcements', { params })),
+  getById: createOfflineAwareAPI((id: string) => api.get(`/announcements/${id}`)),
+  getAllAdmin: createOfflineAwareAPI((params?: {
     page?: number
     limit?: number
     status?: string
     priority?: string
-  }) => api.get('/announcements/admin/all', { params }),
+  }) => api.get('/announcements/admin/all', { params })),
   create: (data: any) => api.post('/announcements', data),
   update: (id: string, data: any) => api.put(`/announcements/${id}`, data),
   delete: (id: string) => api.delete(`/announcements/${id}`),
@@ -93,29 +149,29 @@ export const announcementsApi = {
 
 // Historical Moments API
 export const historicalMomentsApi = {
-  getAll: (params?: {
+  getAll: createOfflineAwareAPI((params?: {
     page?: number
     limit?: number
     mediaType?: string
     tags?: string
     highlighted?: string
-  }) => api.get('/historical-moments', { params }),
-  getById: (id: string) => api.get(`/historical-moments/${id}`),
-  getHighlighted: (params?: { limit?: number }) =>
-    api.get('/historical-moments/highlighted', { params }),
-  getAllAdmin: (params?: {
+  }) => api.get('/historical-moments', { params })),
+  getById: createOfflineAwareAPI((id: string) => api.get(`/historical-moments/${id}`)),
+  getHighlighted: createOfflineAwareAPI((params?: { limit?: number }) =>
+    api.get('/historical-moments/highlighted', { params })),
+  getAllAdmin: createOfflineAwareAPI((params?: {
     page?: number
     limit?: number
     mediaType?: string
     highlighted?: string
-  }) => api.get('/historical-moments/admin/all', { params }),
+  }) => api.get('/historical-moments/admin/all', { params })),
   create: (data: any) => api.post('/historical-moments', data),
   update: (id: string, data: any) => api.put(`/historical-moments/${id}`, data),
   delete: (id: string) => api.delete(`/historical-moments/${id}`),
   toggleHighlight: (id: string) => api.patch(`/historical-moments/${id}/toggle-highlight`),
   // Like/Unlike functionality
   toggleLike: (id: string) => api.post(`/historical-moments/like/${id}`),
-  getLikeStatus: (id: string) => api.get(`/historical-moments/like-status/${id}`),
+  getLikeStatus: createOfflineAwareAPI((id: string) => api.get(`/historical-moments/like-status/${id}`)),
 }
 
 // Upload API
@@ -153,11 +209,11 @@ export const uploadApi = {
 // Slider API
 export const sliderApi = {
   // Get active slider images (public)
-  getActive: () => api.get('/slider/active'),
+  getActive: createOfflineAwareAPI(() => api.get('/slider/active')),
   
   // Admin endpoints
-  getAll: (params?: any) => api.get('/slider', { params }),
-  getById: (id: string) => api.get(`/slider/${id}`),
+  getAll: createOfflineAwareAPI((params?: any) => api.get('/slider', { params })),
+  getById: createOfflineAwareAPI((id: string) => api.get(`/slider/${id}`)),
   create: (data: any) => api.post('/slider', data),
   update: (id: string, data: any) => api.put(`/slider/${id}`, data),
   delete: (id: string) => api.delete(`/slider/${id}`),
@@ -168,7 +224,7 @@ export const sliderApi = {
 // Donation Settings API
 export const donationApi = {
   // Public route
-  getSettings: () => api.get('/donations/settings'),
+  getSettings: createOfflineAwareAPI(() => api.get('/donations/settings')),
   
   // Admin routes
   updateSettings: (data: any) => api.put('/donations/settings', data),
@@ -180,18 +236,18 @@ export const donationApi = {
 // Blood Donation API
 export const bloodDonationApi = {
   // Public routes
-  getAllDonors: (params?: {
+  getAllDonors: createOfflineAwareAPI((params?: {
     bloodGroup?: string
     available?: string
     page?: number
     limit?: number
-  }) => api.get('/blood-donation/donors', { params }),
+  }) => api.get('/blood-donation/donors', { params })),
   
-  getAvailableDonorsByBloodGroup: (bloodGroup: string) => 
-    api.get(`/blood-donation/donors/available/${bloodGroup}`),
+  getAvailableDonorsByBloodGroup: createOfflineAwareAPI((bloodGroup: string) => 
+    api.get(`/blood-donation/donors/available/${bloodGroup}`)),
   
   // Protected routes
-  getMyBloodInfo: () => api.get('/blood-donation/my-info'),
+  getMyBloodInfo: createOfflineAwareAPI(() => api.get('/blood-donation/my-info')),
   
   updateBloodInfo: (data: {
     bloodGroup?: string
@@ -216,21 +272,21 @@ export const bloodDonationApi = {
 // Events API
 export const eventsApi = {
   // Public routes
-  getAll: (params?: {
+  getAll: createOfflineAwareAPI((params?: {
     page?: number
     limit?: number
     category?: string
     status?: string
     featured?: string
     tags?: string
-  }) => api.get('/events', { params }),
-  getById: (id: string) => api.get(`/events/${id}`),
-  getFeatured: (params?: { limit?: number }) =>
-    api.get('/events/featured', { params }),
-  getByCategory: (category: string, params?: {
+  }) => api.get('/events', { params })),
+  getById: createOfflineAwareAPI((id: string) => api.get(`/events/${id}`)),
+  getFeatured: createOfflineAwareAPI((params?: { limit?: number }) =>
+    api.get('/events/featured', { params })),
+  getByCategory: createOfflineAwareAPI((category: string, params?: {
     page?: number
     limit?: number
-  }) => api.get(`/events/category/${category}`, { params }),
+  }) => api.get(`/events/category/${category}`, { params })),
   
   // Authenticated routes
   registerForEvent: (eventId: string, participantData: {
@@ -249,26 +305,26 @@ export const eventsApi = {
   }) => api.post(`/events/${eventId}/register`, participantData),
   
   // Admin routes
-  getAllAdmin: (params?: {
+  getAllAdmin: createOfflineAwareAPI((params?: {
     page?: number
     limit?: number
     status?: string
     category?: string
     published?: string
-  }) => api.get('/events/admin/all', { params }),
-  getStats: () => api.get('/events/admin/stats'),
+  }) => api.get('/events/admin/all', { params })),
+  getStats: createOfflineAwareAPI(() => api.get('/events/admin/stats')),
   create: (data: any) => api.post('/events/admin', data),
   update: (id: string, data: any) => api.put(`/events/admin/${id}`, data),
   updateImages: (id: string, images: any[]) => api.put(`/events/admin/${id}/images`, { images }),
   delete: (id: string) => api.delete(`/events/admin/${id}`),
   togglePublish: (id: string) => api.patch(`/events/admin/${id}/publish`),
   toggleFeature: (id: string) => api.patch(`/events/admin/${id}/feature`),
-  getEventRegistrations: (eventId: string, params?: any) => 
-    api.get(`/events/admin/${eventId}/registrations`, { params }),
+  getEventRegistrations: createOfflineAwareAPI((eventId: string, params?: any) => 
+    api.get(`/events/admin/${eventId}/registrations`, { params })),
   
   // Payment verification routes (admin only)
-  getPendingPayments: (params?: { page?: number; limit?: number }) =>
-    api.get('/events/admin/payments/pending', { params }),
+  getPendingPayments: createOfflineAwareAPI((params?: { page?: number; limit?: number }) =>
+    api.get('/events/admin/payments/pending', { params })),
   verifyPayment: (registrationId: string, data: { status: 'verified' | 'rejected'; note?: string }) =>
     api.patch(`/events/admin/payments/${registrationId}/verify`, data),
 }

@@ -11,13 +11,29 @@ import { useLanguageStore } from './store/languageStore'
 // Initialize language store
 useLanguageStore.getState().initializeLanguage()
 
-// Create a client for React Query
+// Create a client for React Query with offline support
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: (failureCount, _error: any) => {
+        // Don't retry if offline
+        if (!navigator.onLine) return false
+        // Retry up to 3 times for network errors
+        return failureCount < 3
+      },
+      staleTime: 10 * 60 * 1000, // 10 minutes - data stays fresh longer
+      cacheTime: 24 * 60 * 60 * 1000, // 24 hours - keep in cache longer
+      // Keep previous data when refetching
+      keepPreviousData: true,
+      // Don't show errors when offline, use cached data instead
+      useErrorBoundary: false,
+    },
+    mutations: {
+      retry: (failureCount, _error: any) => {
+        if (!navigator.onLine) return false
+        return failureCount < 2
+      },
     },
   },
 })

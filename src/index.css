@@ -2,14 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom base styles */
+/* Performance optimizations */
 @layer base {
   html {
     font-family: system-ui, sans-serif;
+    /* Improve scrolling performance */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
   
   body {
     @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300;
+    /* Prevent layout shift */
+    overflow-x: hidden;
+    /* Improve font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Optimize repaints */
+    will-change: auto;
+  }
+
+  /* Optimize images */
+  img {
+    /* Prevent layout shift */
+    height: auto;
+    /* Improve loading performance */
+    loading: lazy;
+    /* Optimize decoding */
+    decoding: async;
+  }
+
+  /* Optimize transitions */
+  * {
+    /* Use hardware acceleration when appropriate */
+    backface-visibility: hidden;
+    /* Optimize repaints */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+
+  /* Optimize animations */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
@@ -17,14 +55,74 @@
 @layer components {
   .btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200;
+    /* Optimize button performance */
+    will-change: background-color;
+    /* Improve touch targets */
+    min-height: 44px;
+    min-width: 44px;
   }
   
   .btn-secondary {
     @apply bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-semibold transition-colors duration-200;
+    will-change: background-color;
+    min-height: 44px;
+    min-width: 44px;
   }
   
   .card {
     @apply bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-all duration-200;
+    /* Optimize card performance */
+    will-change: transform;
+    /* Improve hover states */
+    transform: translateY(0);
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Optimized loading spinner */
+  .loading-spinner {
+    @apply inline-block w-6 h-6 border-2 border-gray-200 border-t-blue-600 rounded-full;
+    animation: spin 1s linear infinite;
+    will-change: transform;
+  }
+
+  /* Optimized skeleton loading */
+  .skeleton {
+    @apply bg-gray-200 dark:bg-gray-700 rounded animate-pulse;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Optimize focus states for accessibility */
+  .focus-visible {
+    @apply outline-2 outline-blue-500 outline-offset-2;
+  }
+
+  /* Optimize image containers */
+  .image-container {
+    @apply relative overflow-hidden rounded-lg;
+    /* Improve image loading performance */
+    contain: layout style paint;
+  }
+
+  /* Optimize text content */
+  .text-content {
+    /* Improve text rendering */
+    text-rendering: optimizeLegibility;
+    /* Optimize font loading */
+    font-display: swap;
+  }
+
+  /* Optimize grid layouts */
+  .grid-container {
+    /* Improve grid performance */
+    contain: layout style;
+    /* Optimize scrolling */
+    overflow: auto;
+    scroll-snap-type: y mandatory;
   }
 }
 
@@ -37,4 +135,105 @@
   .backdrop-blur-custom {
     backdrop-filter: blur(10px);
   }
+
+  /* Performance utilities */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  .optimize-contrast {
+    /* Improve contrast rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .contain-layout {
+    contain: layout;
+  }
+
+  .contain-paint {
+    contain: paint;
+  }
+
+  .contain-style {
+    contain: style;
+  }
+
+  .contain-strict {
+    contain: strict;
+  }
+
+  /* Offline indicators */
+  .offline-indicator {
+    @apply fixed top-4 right-4 bg-orange-500 text-white px-3 py-2 rounded-full text-sm font-medium shadow-lg z-50;
+    animation: pulse 2s infinite;
+  }
+
+  .online-indicator {
+    @apply fixed top-4 right-4 bg-green-500 text-white px-3 py-2 rounded-full text-sm font-medium shadow-lg z-50;
+    animation: fadeInOut 3s ease-in-out;
+  }
+}
+
+/* Performance-optimized animations */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Critical CSS optimizations */
+@media (max-width: 768px) {
+  /* Optimize mobile performance */
+  .card {
+    will-change: auto;
+    transform: none;
+  }
+  
+  .card:hover {
+    transform: none;
+  }
+  
+  /* Reduce animations on mobile */
+  * {
+    transition-duration: 0.1s !important;
+  }
+}
+
+/* Preload critical resources */
+@font-face {
+  font-family: 'Inter';
+  font-display: swap;
+  font-weight: 300 700;
+  src: url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 } 
