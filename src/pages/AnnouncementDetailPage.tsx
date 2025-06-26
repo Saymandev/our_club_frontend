@@ -1,4 +1,4 @@
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { Skeleton } from '@/components/UI/Skeleton'
 import { announcementsApi } from '@/services/api'
 import { useLanguageStore } from '@/store/languageStore'
 import { motion } from 'framer-motion'
@@ -115,8 +115,24 @@ const AnnouncementDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6">
+            <Skeleton className="h-6 w-32" />
+          </div>
+          <div className="card p-8">
+            <Skeleton className="h-8 w-3/4 mb-4" />
+            <div className="flex items-center space-x-4 mb-6">
+              <Skeleton className="h-5 w-20 rounded-full" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-2/3" />
+            </div>
+          </div>
+        </div>
       </div>
     )
   }

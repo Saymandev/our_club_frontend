@@ -1,4 +1,4 @@
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { CardSkeleton } from '@/components/UI/Skeleton'
 import { announcementsApi } from '@/services/api'
 import { motion } from 'framer-motion'
 import { Calendar, ChevronRight, Filter, Tag } from 'lucide-react'
@@ -115,8 +115,10 @@ const AnnouncementsPage = () => {
 
         {/* Announcements Grid */}
         {isLoading ? (
-          <div className="text-center py-12">
-            <LoadingSpinner size="lg" />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
           </div>
         ) : announcements.length === 0 ? (
           <motion.div

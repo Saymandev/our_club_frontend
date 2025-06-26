@@ -88,12 +88,26 @@
     will-change: transform;
   }
 
-  /* Optimized skeleton loading */
+  /* Enhanced skeleton loading animations */
   .skeleton {
-    @apply bg-gray-200 dark:bg-gray-700 rounded animate-pulse;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    @apply bg-gray-200 dark:bg-gray-700 rounded;
+    background: linear-gradient(90deg, #f0f0f0, #e0e0e0, #f0f0f0);
     background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  .dark .skeleton {
+    background: linear-gradient(90deg, #374151, #4b5563, #374151);
+    background-size: 200% 100%;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 
   /* Optimize focus states for accessibility */

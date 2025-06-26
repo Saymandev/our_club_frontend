@@ -1,4 +1,4 @@
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { Skeleton } from '@/components/UI/Skeleton'
 import { historicalMomentsApi } from '@/services/api'
 import { useAuthStore } from '@/store/authStore'
 import { useLanguageStore } from '@/store/languageStore'
@@ -233,8 +233,21 @@ const HistoricalMomentDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6">
+            <Skeleton className="h-6 w-32" />
+          </div>
+          <div className="card p-8">
+            <Skeleton className="h-8 w-3/4 mb-6" />
+            <Skeleton className="h-64 w-full mb-6" />
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-2/3" />
+            </div>
+          </div>
+        </div>
       </div>
     )
   }

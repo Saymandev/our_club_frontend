@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/UI/Skeleton'
 import { donationApi } from '@/services/api'
 import { motion } from 'framer-motion'
 import { Copy, Heart, Phone, Smartphone } from 'lucide-react'
@@ -91,8 +92,84 @@ const DonationsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Back Button Skeleton */}
+          <Skeleton className="h-6 w-32 mb-6" />
+
+          {/* Header Skeleton */}
+          <div className="text-center mb-12">
+            <Skeleton className="w-20 h-20 rounded-full mx-auto mb-6" />
+            <Skeleton className="h-8 w-64 mx-auto mb-4" />
+            <Skeleton className="h-4 w-96 mx-auto" />
+          </div>
+
+          {/* Mobile Banking Section Skeleton */}
+          <div className="mb-12">
+            <Skeleton className="h-6 w-48 mb-2" />
+            <Skeleton className="h-4 w-80 mb-6" />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6"
+                >
+                  <div className="flex items-center mb-4">
+                    <Skeleton className="w-12 h-12 rounded-lg mr-4" />
+                    <div>
+                      <Skeleton className="h-5 w-20 mb-2" />
+                      <Skeleton className="h-3 w-16" />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <Skeleton className="h-12 w-full rounded-lg" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bank Account Section Skeleton */}
+          <div className="mb-12">
+            <Skeleton className="h-6 w-40 mb-2" />
+            <Skeleton className="h-4 w-72 mb-6" />
+
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index}>
+                      <Skeleton className="h-4 w-24 mb-1" />
+                      <Skeleton className="h-12 w-full rounded-lg" />
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-4">
+                  {Array.from({ length: 2 }).map((_, index) => (
+                    <div key={index}>
+                      <Skeleton className="h-4 w-32 mb-1" />
+                      <Skeleton className="h-12 w-full rounded-lg" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Thank You Section Skeleton */}
+          <div className="text-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-8">
+            <Skeleton className="w-16 h-16 rounded-full mx-auto mb-4" />
+            <Skeleton className="h-6 w-48 mx-auto mb-4" />
+            <Skeleton className="h-4 w-80 mx-auto" />
+          </div>
+
+          {/* Contact Info Skeleton */}
+          <div className="mt-12 text-center">
+            <Skeleton className="h-4 w-64 mx-auto" />
+          </div>
+        </div>
       </div>
     )
   }

@@ -1,4 +1,4 @@
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { FormSkeleton } from '@/components/UI/Skeleton'
 import { donationApi } from '@/services/api'
 import { motion } from 'framer-motion'
 import { Heart, Save, ToggleLeft, ToggleRight } from 'lucide-react'
@@ -136,8 +136,8 @@ const AdminDonations = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <LoadingSpinner size="lg" />
+      <div className="space-y-8">
+        <FormSkeleton />
       </div>
     )
   }

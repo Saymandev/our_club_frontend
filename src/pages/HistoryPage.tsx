@@ -1,4 +1,4 @@
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { CardSkeleton } from '@/components/UI/Skeleton'
 import { historicalMomentsApi } from '@/services/api'
 import { motion } from 'framer-motion'
 import { Calendar, Filter, Image, Play } from 'lucide-react'
@@ -106,8 +106,10 @@ const HistoryPage = () => {
 
         {/* Moments Grid */}
         {isLoading ? (
-          <div className="text-center py-12">
-            <LoadingSpinner size="lg" />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
           </div>
         ) : moments.length === 0 ? (
           <motion.div

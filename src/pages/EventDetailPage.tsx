@@ -1,25 +1,25 @@
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { Skeleton } from '@/components/UI/Skeleton'
 import { donationApi, eventsApi, uploadApi } from '@/services/api'
 import { useAuthStore } from '@/store/authStore'
 import { motion } from 'framer-motion'
 import {
-  AlertCircle,
-  ArrowLeft,
-  Calendar,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  DollarSign,
-  FileImage,
-  Mail,
-  MapPin,
-  Phone,
-  Share2,
-  Star,
-  Tag,
-  User,
-  UserPlus,
-  Users
+    AlertCircle,
+    ArrowLeft,
+    Calendar,
+    CheckCircle,
+    ChevronLeft,
+    ChevronRight,
+    DollarSign,
+    FileImage,
+    Mail,
+    MapPin,
+    Phone,
+    Share2,
+    Star,
+    Tag,
+    User,
+    UserPlus,
+    Users
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -332,8 +332,25 @@ const EventDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6">
+            <Skeleton className="h-6 w-24" />
+          </div>
+          <Skeleton className="h-8 w-3/4 mb-4" />
+          <Skeleton className="h-64 w-full mb-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-2/3" />
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
@@ -803,7 +820,7 @@ const EventDetailPage = () => {
                                   />
                                   {uploadingReceipt && (
                                     <div className="text-sm text-blue-600 flex items-center">
-                                      <LoadingSpinner size="sm" />
+                                      <Skeleton className="h-4 w-4 rounded-full" />
                                       <span className="ml-2">{t('eventDetailPage.uploading')}</span>
                                     </div>
                                   )}
@@ -846,7 +863,7 @@ const EventDetailPage = () => {
                           >
                             {isRegistering ? (
                               <>
-                                <LoadingSpinner size="sm" />
+                                <Skeleton className="h-4 w-4 rounded-full" />
                                 <span className="ml-2">{t('eventDetailPage.registering')}</span>
                               </>
                             ) : (

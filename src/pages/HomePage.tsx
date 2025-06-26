@@ -1,3 +1,4 @@
+import { Skeleton } from '@/components/UI/Skeleton';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -72,9 +73,46 @@ const HomePage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-        <span className="ml-4 text-lg">{t('common.loading')}</span>
+      <div className="min-h-screen">
+        {/* Hero Section Skeleton */}
+        <section className="relative h-screen overflow-hidden">
+          <Skeleton className="absolute inset-0 w-full h-full" />
+          <div className="absolute inset-0 bg-black/20">
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center space-y-4 max-w-2xl mx-auto px-4">
+                <Skeleton className="h-8 w-64 mx-auto" />
+                <Skeleton className="h-4 w-96 mx-auto" />
+                <Skeleton className="h-12 w-32 mx-auto" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* About Section Skeleton */}
+        <section className="py-20 px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <Skeleton className="h-10 w-64 mx-auto mb-6" />
+              <Skeleton className="h-4 w-96 mx-auto" />
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="text-center p-8 rounded-lg bg-white dark:bg-gray-800 shadow-lg"
+                >
+                  <Skeleton className="w-16 h-16 rounded-full mx-auto mb-4" />
+                  <Skeleton className="h-6 w-32 mx-auto mb-4" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4 mx-auto" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
     );
   }

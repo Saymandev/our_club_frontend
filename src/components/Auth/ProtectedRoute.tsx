@@ -1,4 +1,4 @@
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { Skeleton } from '@/components/UI/Skeleton'
 import { useAuthStore } from '@/store/authStore'
 import { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
@@ -16,7 +16,10 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-        <LoadingSpinner size="lg" />
+        <div className="flex flex-col items-center space-y-4">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <Skeleton className="h-4 w-32" />
+        </div>
       </div>
     )
   }

@@ -1,15 +1,15 @@
+import { Skeleton } from '@/components/UI/Skeleton';
 import { motion } from 'framer-motion';
 import {
-    Edit2,
-    ExternalLink,
-    Eye,
-    EyeOff,
-    Image as ImageIcon,
-    Plus,
-    Trash2
+  Edit2,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Image as ImageIcon,
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import LoadingSpinner from '../../components/UI/LoadingSpinner';
 import { sliderApi, uploadApi } from '../../services/api';
 
 interface SliderImage {
@@ -163,7 +163,20 @@ const AdminSlider = () => {
     });
   };
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return (
+    <div className="space-y-4">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-6">
+          <Skeleton className="h-6 w-32 mb-4" />
+          <Skeleton className="h-32 w-full mb-4" />
+          <div className="flex justify-between">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-8 w-24" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="p-6">

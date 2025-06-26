@@ -1,4 +1,4 @@
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { CardSkeleton, DashboardStatsSkeleton } from '@/components/UI/Skeleton'
 import { announcementsApi, historicalMomentsApi } from '@/services/api'
 import { motion } from 'framer-motion'
 import {
@@ -74,8 +74,18 @@ const AdminDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="lg" />
+      <div className="space-y-8">
+        <DashboardStatsSkeleton />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+          <div className="space-y-4">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        </div>
       </div>
     )
   }

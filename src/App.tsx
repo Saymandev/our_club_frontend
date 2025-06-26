@@ -34,8 +34,8 @@ import AdminSlider from '@/pages/admin/AdminSlider'
 
 // Components
 import ProtectedRoute from '@/components/Auth/ProtectedRoute'
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
 import { OfflineBanner } from '@/components/UI/OfflineBanner'
+import { Skeleton } from '@/components/UI/Skeleton'
 
 function App() {
   const { theme, initializeTheme } = useThemeStore()
@@ -58,7 +58,10 @@ function App() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-        <LoadingSpinner size="lg" />
+        <div className="flex flex-col items-center space-y-4">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <Skeleton className="h-4 w-32" />
+        </div>
       </div>
     )
   }

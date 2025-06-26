@@ -1,4 +1,4 @@
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { BloodDonorSkeleton } from '@/components/UI/Skeleton'
 import { bloodDonationApi } from '@/services/api'
 import { User } from '@/store/authStore'
 import { Edit, RotateCcw } from 'lucide-react'
@@ -195,9 +195,7 @@ const AdminBloodDonation: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12">
-            <LoadingSpinner size="lg" />
-          </div>
+          <BloodDonorSkeleton />
         ) : donors.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400">{t('bloodDonation.noDonorsFound')}</p>

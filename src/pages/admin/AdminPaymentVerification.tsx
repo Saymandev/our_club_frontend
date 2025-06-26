@@ -1,4 +1,5 @@
 import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { Skeleton } from '@/components/UI/Skeleton'
 import { eventsApi } from '@/services/api'
 import { motion } from 'framer-motion'
 import {
@@ -182,8 +183,20 @@ const AdminPaymentVerification = () => {
 
       {/* Payments List */}
       {isLoading ? (
-        <div className="text-center py-12">
-          <LoadingSpinner size="lg" />
+        <div className="space-y-4 p-6">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-4">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-6 w-20 rounded-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : filteredPayments.length === 0 ? (
         <motion.div

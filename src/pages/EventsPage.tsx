@@ -1,4 +1,4 @@
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
+import { EventCardSkeleton } from '@/components/UI/Skeleton'
 import { eventsApi } from '@/services/api'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, Filter, MapPin, Star, Tag, Users } from 'lucide-react'
@@ -185,8 +185,10 @@ const EventsPage = () => {
 
         {/* Events Grid */}
         {isLoading ? (
-          <div className="text-center py-12">
-            <LoadingSpinner size="lg" />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <EventCardSkeleton key={i} />
+            ))}
           </div>
         ) : events.length === 0 ? (
           <motion.div
