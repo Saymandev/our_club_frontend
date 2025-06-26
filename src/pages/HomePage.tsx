@@ -222,12 +222,6 @@ const HomePage = () => {
                 transition={{ duration: 0.8 }}
                 className="space-y-4 sm:space-y-6"
               >
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                  {slides[currentSlide]?.title || 'Welcome to Our Club'}
-                </h1>
-                <p className="text-lg sm:text-xl md:text-2xl max-w-2xl mx-auto opacity-90 leading-relaxed">
-                  {slides[currentSlide]?.description || 'Building community, creating memories'}
-                </p>
                 {slides[currentSlide]?.linkUrl && (
                   <motion.a
                     href={slides[currentSlide].linkUrl}
