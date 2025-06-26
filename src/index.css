@@ -242,6 +242,58 @@
   * {
     transition-duration: 0.1s !important;
   }
+  
+  /* Carousel mobile optimizations */
+  .carousel-arrow {
+    /* Larger touch targets on mobile */
+    min-width: 44px;
+    min-height: 44px;
+    /* Better visibility on mobile */
+    backdrop-filter: blur(8px);
+    /* Optimize touch performance */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .carousel-indicator {
+    /* Larger touch targets on mobile */
+    min-width: 32px;
+    min-height: 32px;
+    /* Better spacing on mobile */
+    padding: 8px;
+    /* Optimize touch performance */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Hero text optimizations for mobile */
+  .hero-content {
+    /* Better readability on mobile */
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    /* Prevent text zoom on orientation change */
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  /* Optimize carousel container for mobile */
+  .carousel-container {
+    /* Prevent horizontal scrolling */
+    overflow-x: hidden;
+    /* Enable momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+    /* Optimize touch interactions */
+    touch-action: pan-y;
+  }
+  
+  /* Improve carousel image performance on mobile */
+  .carousel-image {
+    /* Optimize memory usage */
+    image-rendering: -webkit-optimize-contrast;
+    /* Reduce CPU usage */
+    will-change: auto;
+    /* Prevent layout shift */
+    object-fit: cover;
+    object-position: center;
+  }
 }
 
 /* Preload critical resources */

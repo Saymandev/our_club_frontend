@@ -138,7 +138,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section with Slider Images */}
-      <section className="relative h-screen overflow-hidden">
+      <section className="relative h-screen overflow-hidden carousel-container">
         <div className="absolute inset-0">
           {slides.map((slide, index) => (
             <motion.div
@@ -153,7 +153,7 @@ const HomePage = () => {
               <img
                 src={slide.imageUrl}
                 alt={slide.title}
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-center carousel-image"
                 style={{
                   objectFit: 'cover',
                   objectPosition: 'center center',
@@ -178,35 +178,72 @@ const HomePage = () => {
           <>
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300"
+              className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 sm:p-3 rounded-full transition-all duration-300 touch-manipulation carousel-arrow"
+              aria-label="Previous slide"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300"
+              className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 sm:p-3 rounded-full transition-all duration-300 touch-manipulation carousel-arrow"
+              aria-label="Next slide"
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={20} className="sm:w-6 sm:h-6" />
             </button>
           </>
         )}
 
         {/* Slide Indicators */}
         {slides.length > 1 && (
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
+          <div className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex space-x-1 sm:space-x-2">
             {slides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 touch-manipulation carousel-indicator ${
                   index === currentSlide
                     ? 'bg-white scale-125'
                     : 'bg-white/50 hover:bg-white/75'
                 }`}
+                aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>
         )}
+
+        {/* Hero Content */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center text-white px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto hero-content">
+            {slides.length > 0 && (
+              <motion.div
+                key={currentSlide}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="space-y-4 sm:space-y-6"
+              >
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                  {slides[currentSlide]?.title || 'Welcome to Our Club'}
+                </h1>
+                <p className="text-lg sm:text-xl md:text-2xl max-w-2xl mx-auto opacity-90 leading-relaxed">
+                  {slides[currentSlide]?.description || 'Building community, creating memories'}
+                </p>
+                {slides[currentSlide]?.linkUrl && (
+                  <motion.a
+                    href={slides[currentSlide].linkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 sm:py-4 sm:px-8 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg text-sm sm:text-base touch-manipulation"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {slides[currentSlide]?.linkText || 'Learn More'}
+                  </motion.a>
+                )}
+              </motion.div>
+            )}
+          </div>
+        </div>
       </section>
 
       {/* About Section */}

@@ -1,3 +1,4 @@
+import { AdminAnnouncementsSkeleton } from '@/components/UI/Skeleton'
 import { announcementsApi } from '@/services/api'
 import { useAuthStore } from '@/store/authStore'
 import { motion } from 'framer-motion'
@@ -263,10 +264,7 @@ const AdminAnnouncements = () => {
         className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
       >
         {loading ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-500 dark:text-gray-400 mt-2">Loading announcements...</p>
-          </div>
+          <AdminAnnouncementsSkeleton />
         ) : filteredAnnouncements.length === 0 ? (
           <div className="p-8 text-center">
             <Megaphone className="w-12 h-12 text-gray-400 mx-auto mb-4" />

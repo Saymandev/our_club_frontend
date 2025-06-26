@@ -1,3 +1,4 @@
+import { AdminEventsSkeleton } from '@/components/UI/Skeleton'
 import { eventsApi, uploadApi } from '@/services/api'
 import { motion } from 'framer-motion'
 import { Calendar, Edit, Plus, Search, Star, ToggleLeft, ToggleRight, Trash2, Users } from 'lucide-react'
@@ -502,10 +503,7 @@ const AdminEvents = () => {
         className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
       >
         {loading ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-500 dark:text-gray-400 mt-2">Loading events...</p>
-          </div>
+          <AdminEventsSkeleton />
         ) : filteredEvents.length === 0 ? (
           <div className="p-8 text-center">
             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />

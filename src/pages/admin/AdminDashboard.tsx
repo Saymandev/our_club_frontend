@@ -2,10 +2,10 @@ import { CardSkeleton, DashboardStatsSkeleton } from '@/components/UI/Skeleton'
 import { announcementsApi, historicalMomentsApi } from '@/services/api'
 import { motion } from 'framer-motion'
 import {
-    Camera,
-    Megaphone,
-    Star,
-    TrendingUp
+  Camera,
+  Megaphone,
+  Star,
+  TrendingUp
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'

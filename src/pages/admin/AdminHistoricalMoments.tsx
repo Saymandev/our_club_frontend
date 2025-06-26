@@ -1,3 +1,4 @@
+import { AdminHistoricalMomentsSkeleton } from '@/components/UI/Skeleton'
 import { historicalMomentsApi, uploadApi } from '@/services/api'
 import { useAuthStore } from '@/store/authStore'
 import { motion } from 'framer-motion'
@@ -405,10 +406,7 @@ const AdminHistoricalMoments = () => {
         transition={{ duration: 0.6, delay: 0.2 }}
       >
         {loading ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-            <p className="text-gray-500 dark:text-gray-400 mt-2">Loading moments...</p>
-          </div>
+          <AdminHistoricalMomentsSkeleton />
         ) : filteredMoments.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
             <Camera className="w-12 h-12 text-gray-400 mx-auto mb-4" />
