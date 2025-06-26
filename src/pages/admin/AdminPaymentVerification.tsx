@@ -1,4 +1,3 @@
-import LoadingSpinner from '@/components/UI/LoadingSpinner'
 import { Skeleton } from '@/components/UI/Skeleton'
 import { eventsApi } from '@/services/api'
 import { motion } from 'framer-motion'
@@ -318,12 +317,12 @@ const AdminPaymentVerification = () => {
 
       {/* Verification Modal */}
       {showVerificationModal && selectedPayment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 p-0 sm:p-4 sm:flex sm:items-center sm:justify-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
+            className="bg-white dark:bg-gray-800 w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-2xl sm:rounded-lg shadow-xl overflow-hidden"
           >
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
@@ -454,7 +453,7 @@ const AdminPaymentVerification = () => {
                   >
                     {isVerifying ? (
                       <>
-                        <LoadingSpinner size="sm" />
+                        <Skeleton className="h-4 w-4 rounded-full" />
                         <span className="ml-2">Processing...</span>
                       </>
                     ) : (

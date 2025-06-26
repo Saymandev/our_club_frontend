@@ -650,10 +650,10 @@ const EventDetailPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4 }}
                         onSubmit={handleSubmit(handleRegister)} 
-                        className="bg-white dark:bg-gray-700 rounded-lg p-6 border border-gray-200 dark:border-gray-600"
+                        className="bg-white dark:bg-gray-700 rounded-lg p-4 sm:p-6 border border-gray-200 dark:border-gray-600"
                       >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                          <div className="md:col-span-2">
+                        <div className="grid grid-cols-1 gap-4 mb-6">
+                          <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               <span className="flex items-center">
                                 <User className="w-4 h-4 mr-2 text-gray-500" />
@@ -665,84 +665,86 @@ const EventDetailPage = () => {
                                 required: 'Name is required',
                                 minLength: { value: 2, message: 'Name must be at least 2 characters' }
                               })}
-                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                              className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
                               placeholder={t('eventDetailPage.enterYourName')}
                             />
                             {errors.participantName && (
                               <p className="text-red-500 text-sm mt-1 flex items-center">
-                                <AlertCircle className="w-3 h-3 mr-1" />
-                                {errors.participantName.message}
+                                <AlertCircle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                <span className="break-words">{errors.participantName.message}</span>
                               </p>
                             )}
                           </div>
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                              <span className="flex items-center">
-                                <Phone className="w-4 h-4 mr-2 text-gray-500" />
-                                {t('eventDetailPage.phoneNumber')} *
-                              </span>
-                            </label>
-                            <input
-                              {...register('participantPhone', { 
-                                required: 'Phone number is required',
-                                pattern: {
-                                  value: /^[+]?[\d\s\-\(\)]+$/,
-                                  message: 'Please enter a valid phone number'
-                                }
-                              })}
-                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                              placeholder={t('eventDetailPage.enterYourPhone')}
-                            />
-                            {errors.participantPhone && (
-                              <p className="text-red-500 text-sm mt-1 flex items-center">
-                                <AlertCircle className="w-3 h-3 mr-1" />
-                                {errors.participantPhone.message}
-                              </p>
-                            )}
-                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <span className="flex items-center">
+                                  <Phone className="w-4 h-4 mr-2 text-gray-500" />
+                                  {t('eventDetailPage.phoneNumber')} *
+                                </span>
+                              </label>
+                              <input
+                                {...register('participantPhone', { 
+                                  required: 'Phone number is required',
+                                  pattern: {
+                                    value: /^[+]?[\d\s\-\(\)]+$/,
+                                    message: 'Please enter a valid phone number'
+                                  }
+                                })}
+                                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
+                                placeholder={t('eventDetailPage.enterYourPhone')}
+                              />
+                              {errors.participantPhone && (
+                                <p className="text-red-500 text-sm mt-1 flex items-center">
+                                  <AlertCircle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                  <span className="break-words">{errors.participantPhone.message}</span>
+                                </p>
+                              )}
+                            </div>
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                              <span className="flex items-center">
-                                <Mail className="w-4 h-4 mr-2 text-gray-500" />
-                                {t('eventDetailPage.emailAddress')} ({t('eventDetailPage.optional')})
-                              </span>
-                            </label>
-                            <input
-                              type="email"
-                              {...register('participantEmail', {
-                                pattern: {
-                                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                  message: 'Please enter a valid email address'
-                                }
-                              })}
-                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                              placeholder={t('eventDetailPage.enterYourEmail')}
-                            />
-                            {errors.participantEmail && (
-                              <p className="text-red-500 text-sm mt-1 flex items-center">
-                                <AlertCircle className="w-3 h-3 mr-1" />
-                                {errors.participantEmail.message}
-                              </p>
-                            )}
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <span className="flex items-center">
+                                  <Mail className="w-4 h-4 mr-2 text-gray-500" />
+                                  {t('eventDetailPage.emailAddress')} ({t('eventDetailPage.optional')})
+                                </span>
+                              </label>
+                              <input
+                                type="email"
+                                {...register('participantEmail', {
+                                  pattern: {
+                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                    message: 'Please enter a valid email address'
+                                  }
+                                })}
+                                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
+                                placeholder={t('eventDetailPage.enterYourEmail')}
+                              />
+                              {errors.participantEmail && (
+                                <p className="text-red-500 text-sm mt-1 flex items-center">
+                                  <AlertCircle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                  <span className="break-words">{errors.participantEmail.message}</span>
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
 
                         {event.fee > 0 && (
                           <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
-                            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                            <h4 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
                               <DollarSign className="w-5 h-5 mr-2 text-amber-600 dark:text-amber-400" />
                               {t('eventDetailPage.paymentInformation')}
                             </h4>
                             
-                          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
-                              <div className="flex items-center justify-between mb-2">
-                              <span className="text-amber-800 dark:text-amber-300 font-medium">
+                            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                                <span className="text-amber-800 dark:text-amber-300 font-medium text-sm sm:text-base">
                                   {t('eventDetailPage.registrationFee')}: ৳{event.fee}
-                              </span>
+                                </span>
                               </div>
-                              <p className="text-amber-700 dark:text-amber-400 text-sm">
+                              <p className="text-amber-700 dark:text-amber-400 text-xs sm:text-sm">
                                 {t('eventDetailPage.paymentInstructions')}
                               </p>
                             </div>
@@ -754,7 +756,7 @@ const EventDetailPage = () => {
                               </label>
                               <select
                                 {...register('paymentMethod', { required: t('eventDetailPage.paymentMethodRequired') })}
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
                               >
                                 <option value="">{t('eventDetailPage.selectPaymentMethod')}</option>
                                 {getPaymentMethods().map((method) => (
@@ -765,20 +767,20 @@ const EventDetailPage = () => {
                               </select>
                               {errors.paymentMethod && (
                                 <p className="text-red-500 text-sm mt-1 flex items-center">
-                                  <AlertCircle className="w-3 h-3 mr-1" />
-                                  {errors.paymentMethod.message}
+                                  <AlertCircle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                  <span className="break-words">{errors.paymentMethod.message}</span>
                                 </p>
                               )}
                             </div>
 
                             {/* Payment Instructions */}
                             {paymentMethod && getSelectedPaymentInfo() && (
-                              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
-                                <h5 className="font-medium text-blue-800 dark:text-blue-300 mb-2">
+                              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4 mb-4">
+                                <h5 className="font-medium text-blue-800 dark:text-blue-300 mb-2 text-sm sm:text-base">
                                   {t('eventDetailPage.paymentInstructionsFor', { method: getSelectedPaymentInfo()?.label })}
                                 </h5>
-                                <div className="text-blue-700 dark:text-blue-400 text-sm space-y-1">
-                                  <p><strong>{t('eventDetailPage.paymentNumber')}:</strong> {getSelectedPaymentInfo()?.number}</p>
+                                <div className="text-blue-700 dark:text-blue-400 text-xs sm:text-sm space-y-1">
+                                  <p><strong>{t('eventDetailPage.paymentNumber')}:</strong> <span className="break-all">{getSelectedPaymentInfo()?.number}</span></p>
                                   <p><strong>{t('eventDetailPage.paymentInstructionsText')}:</strong> {getSelectedPaymentInfo()?.instructions}</p>
                                 </div>
                               </div>
@@ -794,13 +796,13 @@ const EventDetailPage = () => {
                                   required: t('eventDetailPage.transactionIdRequired'),
                                   minLength: { value: 3, message: t('eventDetailPage.transactionIdMinLength') }
                                 })}
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
                                 placeholder={t('eventDetailPage.enterTransactionId')}
                               />
                               {errors.transactionId && (
                                 <p className="text-red-500 text-sm mt-1 flex items-center">
-                                  <AlertCircle className="w-3 h-3 mr-1" />
-                                  {errors.transactionId.message}
+                                  <AlertCircle className="w-3 h-3 mr-1 flex-shrink-0" />
+                                  <span className="break-words">{errors.transactionId.message}</span>
                                 </p>
                               )}
                             </div>
@@ -811,15 +813,15 @@ const EventDetailPage = () => {
                                 {t('eventDetailPage.paymentReceiptOptional')}
                               </label>
                               <div className="space-y-3">
-                                <div className="flex items-center space-x-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                                   <input
                                     type="file"
                                     accept="image/*"
                                     onChange={handleReceiptUpload}
-                                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                    className="block w-full text-xs sm:text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                   />
                                   {uploadingReceipt && (
-                                    <div className="text-sm text-blue-600 flex items-center">
+                                    <div className="text-xs sm:text-sm text-blue-600 flex items-center">
                                       <Skeleton className="h-4 w-4 rounded-full" />
                                       <span className="ml-2">{t('eventDetailPage.uploading')}</span>
                                     </div>
@@ -829,10 +831,10 @@ const EventDetailPage = () => {
                                 {receiptImage && (
                                   <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
                                     <div className="flex items-center text-green-800 dark:text-green-300">
-                                      <FileImage className="w-4 h-4 mr-2" />
-                                      <span className="text-sm font-medium">{t('eventDetailPage.receiptUploaded')}</span>
+                                      <FileImage className="w-4 h-4 mr-2 flex-shrink-0" />
+                                      <span className="text-xs sm:text-sm font-medium">{t('eventDetailPage.receiptUploaded')}</span>
                                     </div>
-                                    <p className="text-green-700 dark:text-green-400 text-xs mt-1">
+                                    <p className="text-green-700 dark:text-green-400 text-xs mt-1 break-all">
                                       {receiptImage.filename}
                                     </p>
                                   </div>
@@ -844,7 +846,7 @@ const EventDetailPage = () => {
                               </div>
                             </div>
 
-                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-sm text-gray-600 dark:text-gray-400">
+                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                               <p className="font-medium mb-1">{t('eventDetailPage.importantNotes')}</p>
                               <ul className="list-disc list-inside space-y-1 text-xs">
                                 <li>{t('eventDetailPage.paymentNote1')}</li>
@@ -855,11 +857,11 @@ const EventDetailPage = () => {
                           </div>
                         )}
 
-                        <div className="flex gap-3 mt-4">
+                        <div className="flex flex-col sm:flex-row gap-3 mt-4">
                           <button
                             type="submit"
                             disabled={isRegistering}
-                            className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex-1 group items-center "
+                            className="w-full sm:flex-1 btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed group items-center justify-center text-sm sm:text-base py-2 sm:py-3"
                           >
                             {isRegistering ? (
                               <>
@@ -876,7 +878,7 @@ const EventDetailPage = () => {
                           <button
                             type="button"
                             onClick={() => setShowRegistrationForm(false)}
-                            className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                            className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm sm:text-base"
                           >
                             {t('eventDetailPage.cancel')}
                           </button>
