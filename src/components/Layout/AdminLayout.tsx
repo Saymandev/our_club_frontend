@@ -2,11 +2,13 @@ import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils/cn'
 import {
+  BookOpen,
   Building2,
   Calendar,
   Camera,
   CreditCard,
   Droplets,
+  FileText,
   Heart,
   Home,
   ImageIcon,
@@ -43,6 +45,8 @@ const AdminLayout = () => {
     { name: 'Blood Institutes', href: '/admin/blood-institutes', icon: Building2, roles: ['admin', 'moderator'] },
     { name: t('bloodDonation.adminTitle'), href: '/admin/blood-donation', icon: Droplets, roles: ['admin'] },
     { name: 'User Management', href: '/admin/users', icon: Users, roles: ['admin'] },
+    { name: 'Course Management', href: '/admin/courses', icon: BookOpen, roles: ['admin', 'moderator'] },
+    { name: 'Exam Management', href: '/admin/exams', icon: FileText, roles: ['admin', 'moderator'] },
     { name: 'Donation Settings', href: '/admin/donations', icon: Heart, roles: ['admin'] },
     { name: 'Payment Verification', href: '/admin/payment-verification', icon: CreditCard, roles: ['admin'] },
     { name: 'Settings', href: '/admin/settings', icon: Settings, roles: ['admin'] },

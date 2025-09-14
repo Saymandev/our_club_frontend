@@ -46,12 +46,9 @@ const AdminUsers: React.FC = () => {
     try {
       setLoading(true)
       const response = await authApi.getUsers(filters)
-      console.log('API Response:', response)
       setUsers(response.data.data)
       setPagination(response.data.pagination)
     } catch (error: any) {
-      console.error('API Error:', error)
-      console.error('Error Response:', error.response)
       toast.error(error.response?.data?.message || error.message || 'Failed to fetch users')
     } finally {
       setLoading(false)

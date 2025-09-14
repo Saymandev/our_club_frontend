@@ -11,9 +11,13 @@ import Layout from '@/components/Layout/Layout'
 import AnnouncementDetailPage from '@/pages/AnnouncementDetailPage'
 import AnnouncementsPage from '@/pages/AnnouncementsPage'
 import BloodDonorsPage from '@/pages/BloodDonorsPage'
+import CourseDetailPage from '@/pages/CourseDetailPage'
+import CoursesPage from '@/pages/CoursesPage'
 import DonationsPage from '@/pages/DonationsPage'
 import EventDetailPage from '@/pages/EventDetailPage'
 import EventsPage from '@/pages/EventsPage'
+import ExamPage from '@/pages/ExamPage'
+import ExamResultsPage from '@/pages/ExamResultsPage'
 import HistoricalMomentDetailPage from '@/pages/HistoricalMomentDetailPage'
 import HistoryPage from '@/pages/HistoryPage'
 import HomePage from '@/pages/HomePage'
@@ -25,9 +29,11 @@ import RegisterPage from '@/pages/RegisterPage'
 import AdminAnnouncements from '@/pages/admin/AdminAnnouncements'
 import AdminBloodDonation from '@/pages/admin/AdminBloodDonation'
 import AdminBloodInstitutes from '@/pages/admin/AdminBloodInstitutes'
+import AdminCourses from '@/pages/admin/AdminCourses'
 import AdminDashboard from '@/pages/admin/AdminDashboard'
 import AdminDonations from '@/pages/admin/AdminDonations'
 import AdminEvents from '@/pages/admin/AdminEvents'
+import AdminExams from '@/pages/admin/AdminExams'
 import AdminHistoricalMoments from '@/pages/admin/AdminHistoricalMoments'
 import AdminPaymentVerification from '@/pages/admin/AdminPaymentVerification'
 import AdminSettings from '@/pages/admin/AdminSettings'
@@ -83,6 +89,10 @@ function App() {
           <Route path="history/:id" element={<HistoricalMomentDetailPage />} />
           <Route path="blood-donors" element={<BloodDonorsPage />} />
           <Route path="donations" element={<DonationsPage />} />
+          <Route path="courses" element={<CoursesPage />} />
+          <Route path="courses/:id" element={<CourseDetailPage />} />
+          <Route path="exam/:id" element={<ExamPage />} />
+          <Route path="exam-results" element={<ExamResultsPage />} />
         </Route>
 
         {/* Auth Routes */}
@@ -116,6 +126,8 @@ function App() {
           <Route path="blood-institutes" element={<AdminBloodInstitutes />} />
           <Route path="blood-donation" element={<AdminBloodDonation />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="courses" element={<AdminCourses />} />
+          <Route path="exams" element={<AdminExams />} />
           <Route path="donations" element={<AdminDonations />} />
           <Route path="payment-verification" element={<AdminPaymentVerification />} />
           <Route path="settings" element={<AdminSettings />} />

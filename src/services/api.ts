@@ -429,4 +429,157 @@ export const eventsApi = {
     api.patch(`/events/admin/payments/${registrationId}/verify`, data),
 }
 
+// LMS API services
+export const coursesApi = {
+  getAll: createOfflineAwareAPI((params?: {
+    page?: number
+    limit?: number
+    level?: string
+    isPublished?: string
+    search?: string
+  }) => api.get('/courses', { params })),
+  
+  getById: createOfflineAwareAPI((id: string) => api.get(`/courses/${id}`)),
+  
+  // Admin routes
+  create: (data: {
+    title: string
+    description: string
+    instructor: string
+    duration: number
+    level?: 'beginner' | 'intermediate' | 'advanced'
+    thumbnail?: string
+    tags?: string[]
+    isPublished?: boolean
+  }) => api.post('/courses', data),
+  
+  update: (id: string, data: any) => api.put(`/courses/${id}`, data),
+  delete: (id: string) => api.delete(`/courses/${id}`),
+}
+
+export const examsApi = {
+  getAll: createOfflineAwareAPI((params?: {
+    page?: number
+    limit?: number
+    type?: 'quiz' | 'document_submission'
+    subjectId?: string
+    chapterId?: string
+    isPublished?: string
+  }) => api.get('/exams', { params })),
+  
+  getById: createOfflineAwareAPI((id: string) => api.get(`/exams/${id}`)),
+  
+  submit: (id: string, data: {
+    answers: Array<{
+      questionId: string
+      answer: string | string[] | File
+    }>
+    timeSpent: number
+  }) => api.post(`/exams/${id}/submit`, data),
+  
+  getMyResults: createOfflineAwareAPI((params?: {
+    page?: number
+    limit?: number
+    examId?: string
+  }) => api.get('/exams/results/my', { params })),
+  
+  // Admin routes
+  create: (data: {
+    title: string
+    description: string
+    type: 'quiz' | 'document_submission'
+    subjectId?: string
+    chapterId?: string
+    questions: Array<{
+      question: string
+      type: 'multiple_choice' | 'true_false' | 'text' | 'file_upload'
+      options?: string[]
+      correctAnswer?: string | string[]
+      points: number
+      required: boolean
+    }>
+    passingScore: number
+    timeLimit?: number
+    attemptsAllowed?: number
+    startDate: string
+    endDate?: string
+    isPublished?: boolean
+  }) => api.post('/exams', data),
+  
+  update: (id: string, data: any) => api.put(`/exams/${id}`, data),
+  delete: (id: string) => api.delete(`/exams/${id}`),
+}
+
+export const subjectsApi = {
+  getByCourse: createOfflineAwareAPI((courseId: string, params?: {
+    page?: number
+    limit?: number
+    isPublished?: string
+  }) => api.get(`/subjects/course/${courseId}`, { params })),
+  
+  getById: createOfflineAwareAPI((id: string) => api.get(`/subjects/${id}`)),
+  
+  // Admin routes
+  create: (data: {
+    courseId: string
+    title: string
+    description: string
+    order: number
+    isPublished?: boolean
+  }) => api.post('/subjects', data),
+  
+  update: (id: string, data: any) => api.put(`/subjects/${id}`, data),
+  delete: (id: string) => api.delete(`/subjects/${id}`),
+}
+
+export const chaptersApi = {
+  getBySubject: createOfflineAwareAPI((subjectId: string, params?: {
+    page?: number
+    limit?: number
+    isPublished?: string
+  }) => api.get(`/chapters/subject/${subjectId}`, { params })),
+  
+  getById: createOfflineAwareAPI((id: string) => api.get(`/chapters/${id}`)),
+  
+  // Admin routes
+  create: (data: {
+    subjectId: string
+    title: string
+    description: string
+    order: number
+    isPublished?: boolean
+  }) => api.post('/chapters', data),
+  
+  update: (id: string, data: any) => api.put(`/chapters/${id}`, data),
+  delete: (id: string) => api.delete(`/chapters/${id}`),
+}
+
+export const videosApi = {
+  getByChapter: createOfflineAwareAPI((chapterId: string, params?: {
+    page?: number
+    limit?: number
+    isPublished?: string
+  }) => api.get(`/videos/chapter/${chapterId}`, { params })),
+  
+  getById: createOfflineAwareAPI((id: string) => api.get(`/videos/${id}`)),
+  
+  updateProgress: (id: string, data: { watchedDuration: number }) => 
+    api.post(`/videos/${id}/progress`, data),
+  
+  // Admin routes
+  create: (data: {
+    chapterId: string
+    title: string
+    description: string
+    videoUrl: string
+    thumbnail?: string
+    duration: number
+    order: number
+    isPublished?: boolean
+  }) => api.post('/videos', data),
+  
+  update: (id: string, data: any) => api.put(`/videos/${id}`, data),
+  delete: (id: string) => api.delete(`/videos/${id}`),
+}
+
 export default api 

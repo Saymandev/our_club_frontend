@@ -1,8 +1,8 @@
 import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils/cn'
-import { ChevronDown, Droplets, Menu, Moon, Settings, Sun, User, X } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronDown, Droplets, FileText, Menu, Moon, Settings, Sun, User, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router-dom'
 import logo from '../../assests/logo.jpg'
@@ -15,6 +15,8 @@ const Header = () => {
   const { isAuthenticated, user } = useAuthStore()
   const location = useLocation()
   const { t } = useTranslation()
+  const menuRef = useRef<HTMLDivElement>(null)
+  const userMenuRef = useRef<HTMLDivElement>(null)
 
   const navigation = [
     { name: t('common.home'), href: '/' },
@@ -23,6 +25,7 @@ const Header = () => {
     { name: t('common.history'), href: '/history' },
     { name: t('common.bloodDonors'), href: '/blood-donors' },
     { name: t('common.donations'), href: '/donations' },
+    { name: 'Courses', href: '/courses' },
   ]
 
   const isActivePath = (path: string) => {
@@ -32,6 +35,25 @@ const Header = () => {
     return location.pathname.startsWith(path)
   }
 
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false)
+  }, [location.pathname])
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,17 +61,17 @@ const Header = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary-600 rounded-lg flex items-center justify-center">
                 <img src={logo} alt="logo" className="w-full h-full object-cover rounded-lg" />
               </div>
-              <span className="font-heading font-bold text-lg lg:text-xl text-gray-900 dark:text-white hidden sm:block">
+              <span className="font-heading font-bold text-base sm:text-lg lg:text-xl text-gray-900 dark:text-white hidden min-[400px]:block max-w-32 sm:max-w-none truncate">
                 {t('header.clubName')}
               </span>
             </Link>
           </div>
 
-          {/* Desktop Navigation - Show on extra large screens only due to many nav items */}
-          <nav className="hidden xl:flex items-center space-x-3 2xl:space-x-6">
+          {/* Desktop Navigation - Show on large screens */}
+          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 2xl:space-x-4">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -86,15 +108,15 @@ const Header = () => {
               )}
             </button>
 
-            {/* User Menu - Only show on larger screens */}
+            {/* User Menu - Show on medium screens and up */}
             {isAuthenticated && user ? (
-              <div className="relative hidden lg:block">
+              <div className="relative hidden md:block" ref={userMenuRef}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-1 xl:space-x-2 px-2 xl:px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 rounded-lg"
+                  className="flex items-center space-x-1 lg:space-x-2 px-2 lg:px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 rounded-lg"
                 >
                   <User className="w-4 h-4" />
-                  <span className="hidden xl:inline max-w-20 truncate">{user.username}</span>
+                  <span className="hidden lg:inline max-w-20 truncate">{user.username}</span>
                   <ChevronDown className="w-4 h-4" />
                 </button>
                 
@@ -110,6 +132,14 @@ const Header = () => {
                       {t('bloodDonation.myProfile')}
                     </Link>
                     <Link
+                      to="/exam-results"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <FileText className="w-4 h-4 mr-3" />
+                      Exam Results
+                    </Link>
+                    <Link
                       to="/admin"
                       onClick={() => setIsUserMenuOpen(false)}
                       className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -123,7 +153,7 @@ const Header = () => {
             ) : (
               <Link
                 to="/login"
-                className="btn-primary text-sm px-3 hidden lg:block"
+                className="btn-primary text-sm px-3 hidden md:block"
               >
                 {t('common.login')}
               </Link>
@@ -132,7 +162,7 @@ const Header = () => {
             {/* Mobile menu button - Show on tablets and mobile */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="xl:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+              className="lg:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
               aria-label={t('header.toggleMenu')}
             >
               {isMenuOpen ? (
@@ -146,7 +176,7 @@ const Header = () => {
 
         {/* Mobile Navigation - Show on tablets and mobile */}
         {isMenuOpen && (
-          <div className="xl:hidden py-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="lg:hidden py-4 border-t border-gray-200 dark:border-gray-700" ref={menuRef}>
             <nav className="flex flex-col space-y-1">
               {navigation.map((item) => (
                 <Link
@@ -154,13 +184,16 @@ const Header = () => {
                   to={item.href}
                   onClick={() => setIsMenuOpen(false)}
                   className={cn(
-                    'px-3 py-3 rounded-md text-base font-medium transition-colors duration-200',
+                    'px-3 py-3 rounded-md text-base font-medium transition-colors duration-200 flex items-center justify-between',
                     isActivePath(item.href)
                       ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
                       : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                   )}
                 >
-                  {item.name}
+                  <span>{item.name}</span>
+                  {isActivePath(item.href) && (
+                    <div className="w-2 h-2 bg-primary-600 dark:bg-primary-400 rounded-full"></div>
+                  )}
                 </Link>
               ))}
               
@@ -184,6 +217,14 @@ const Header = () => {
                     >
                       <Droplets className="w-5 h-5 mr-3" />
                       {t('bloodDonation.myProfile')}
+                    </Link>
+                    <Link
+                      to="/exam-results"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
+                    >
+                      <FileText className="w-5 h-5 mr-3" />
+                      Exam Results
                     </Link>
                     <Link
                       to="/admin"
