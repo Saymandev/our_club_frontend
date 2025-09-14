@@ -1,7 +1,7 @@
 import { BloodDonorSkeleton } from '@/components/UI/Skeleton'
 import { bloodDonationApi } from '@/services/api'
 import { User } from '@/store/authStore'
-import { Edit, RotateCcw } from 'lucide-react'
+import { Edit, Plus, RotateCcw } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
@@ -16,7 +16,15 @@ const AdminBloodDonation: React.FC = () => {
   const [donors, setDonors] = useState<BloodDonor[]>([])
   const [loading, setLoading] = useState(true)
   const [editingDonor, setEditingDonor] = useState<BloodDonor | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
   const [editForm, setEditForm] = useState({
+    bloodGroup: '',
+    contactNumber: '',
+    lastDonationDate: ''
+  })
+  const [addForm, setAddForm] = useState({
+    username: '',
+    email: '',
     bloodGroup: '',
     contactNumber: '',
     lastDonationDate: ''
@@ -78,6 +86,32 @@ const AdminBloodDonation: React.FC = () => {
     }
   }
 
+  const handleAddDonor = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      // Create a new user with blood donation info
+      // Note: This would require a new API endpoint to create users with blood info
+      // For now, we'll show a message that this feature needs backend support
+      toast.error('This feature requires backend support. Please create users through the user management system first.')
+      
+      // TODO: Implement API call to create new user with blood donation info
+      // await bloodDonationApi.createDonor(addForm)
+      
+      setShowAddModal(false)
+      setAddForm({
+        username: '',
+        email: '',
+        bloodGroup: '',
+        contactNumber: '',
+        lastDonationDate: ''
+      })
+      fetchDonors() // Refresh the list
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to create donor')
+    }
+  }
+
   const handleResetAvailability = async (donor: BloodDonor) => {
     if (!confirm(`Are you sure you want to reset donation availability for ${donor.username}? This will make them immediately available to donate.`)) {
       return
@@ -129,9 +163,18 @@ const AdminBloodDonation: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{t('bloodDonation.adminTitle')}</h1>
-        <p className="text-gray-600 dark:text-gray-400">{t('bloodDonation.adminDescription')}</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{t('bloodDonation.adminTitle')}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{t('bloodDonation.adminDescription')}</p>
+        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Add New Donor
+        </button>
       </div>
 
       {/* Filters */}
@@ -377,6 +420,112 @@ const AdminBloodDonation: React.FC = () => {
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                 >
                   {t('bloodDonation.update')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add New Donor Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Add New Blood Donor
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Create a new donor profile
+              </p>
+            </div>
+
+            <form onSubmit={handleAddDonor} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Username *
+                </label>
+                <input
+                  type="text"
+                  value={addForm.username}
+                  onChange={(e) => setAddForm(prev => ({ ...prev, username: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter username"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  value={addForm.email}
+                  onChange={(e) => setAddForm(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter email"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Blood Group *
+                </label>
+                <select
+                  value={addForm.bloodGroup}
+                  onChange={(e) => setAddForm(prev => ({ ...prev, bloodGroup: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  required
+                >
+                  <option value="">Select Blood Group</option>
+                  {bloodGroups.map(group => (
+                    <option key={group} value={group}>{group}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Contact Number *
+                </label>
+                <input
+                  type="tel"
+                  value={addForm.contactNumber}
+                  onChange={(e) => setAddForm(prev => ({ ...prev, contactNumber: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter contact number"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Last Donation Date
+                </label>
+                <input
+                  type="date"
+                  value={addForm.lastDonationDate}
+                  onChange={(e) => setAddForm(prev => ({ ...prev, lastDonationDate: e.target.value }))}
+                  max={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div className="flex justify-end gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                >
+                  Add Donor
                 </button>
               </div>
             </form>

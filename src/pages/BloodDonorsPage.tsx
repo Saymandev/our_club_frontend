@@ -1,6 +1,7 @@
 import { BloodDonorSkeleton } from '@/components/UI/Skeleton'
-import { bloodDonationApi } from '@/services/api'
+import { bloodDonationApi, bloodInstitutesApi } from '@/services/api'
 import { User } from '@/store/authStore'
+import { Building2, Clock, Globe, MapPin, Phone } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
@@ -8,6 +9,48 @@ import { useTranslation } from 'react-i18next'
 interface BloodDonor extends User {
   daysSinceLastDonation?: number | null
   isAvailableForDonation?: boolean
+}
+
+interface BloodInstitute {
+  _id: string
+  name: string
+  type: string
+  description?: string
+  phoneNumbers: string[]
+  email?: string
+  website?: string
+  address: {
+    street: string
+    city: string
+    state: string
+    postalCode?: string
+    country: string
+  }
+  contactPerson: {
+    name: string
+    title: string
+    phoneNumber: string
+    email?: string
+  }
+  services: {
+    bloodCollection: boolean
+    bloodTesting: boolean
+    bloodStorage: boolean
+    emergencyServices: boolean
+    mobileBloodDrive: boolean
+    apheresis: boolean
+  }
+  operatingHours: {
+    monday: { open: string; close: string; isClosed: boolean }
+    tuesday: { open: string; close: string; isClosed: boolean }
+    wednesday: { open: string; close: string; isClosed: boolean }
+    thursday: { open: string; close: string; isClosed: boolean }
+    friday: { open: string; close: string; isClosed: boolean }
+    saturday: { open: string; close: string; isClosed: boolean }
+    sunday: { open: string; close: string; isClosed: boolean }
+  }
+  status: string
+  isVerified: boolean
 }
 
 const BloodDonorsPage: React.FC = () => {
@@ -28,6 +71,8 @@ const BloodDonorsPage: React.FC = () => {
   const [emergencySearch, setEmergencySearch] = useState('')
   const [emergencyDonors, setEmergencyDonors] = useState<BloodDonor[]>([])
   const [emergencyLoading, setEmergencyLoading] = useState(false)
+  const [institutes, setInstitutes] = useState<BloodInstitute[]>([])
+  const [institutesLoading, setInstitutesLoading] = useState(false)
 
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 
@@ -71,8 +116,25 @@ const BloodDonorsPage: React.FC = () => {
     }
   }
 
+  const fetchInstitutes = async () => {
+    try {
+      setInstitutesLoading(true)
+      const response = await bloodInstitutesApi.getAll({ 
+        limit: 10, 
+        status: 'active' 
+      })
+      setInstitutes(response.data.data)
+    } catch (error: any) {
+      console.error('Error fetching institutes:', error)
+      // Don't show error toast for institutes, just log it
+    } finally {
+      setInstitutesLoading(false)
+    }
+  }
+
   useEffect(() => {
     fetchDonors()
+    fetchInstitutes()
   }, [filters])
 
   const handleFilterChange = (key: string, value: string) => {
@@ -170,6 +232,105 @@ const BloodDonorsPage: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Blood Institutes Section */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold text-blue-800 dark:text-blue-300 mb-4 flex items-center gap-2">
+            <Building2 className="w-5 h-5" />
+            Blood Donation Centers
+          </h2>
+          <p className="text-blue-700 dark:text-blue-300 mb-4">
+            Find nearby blood donation centers and hospitals where you can donate blood.
+          </p>
+          
+          {institutesLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-blue-700 dark:text-blue-300 mt-2">Loading institutes...</p>
+            </div>
+          ) : institutes.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {institutes.map((institute) => (
+                <div key={institute._id} className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-blue-200 dark:border-blue-800 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                        {institute.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                        {institute.type.replace('_', ' ')}
+                      </p>
+                    </div>
+                    {institute.isVerified && (
+                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">
+                        Verified
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                      <MapPin className="w-4 h-4" />
+                      <span>{institute.address.city}, {institute.address.state}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                      <Phone className="w-4 h-4" />
+                      <span>{institute.phoneNumbers[0]}</span>
+                    </div>
+
+                    {institute.website && (
+                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                        <Globe className="w-4 h-4" />
+                        <a 
+                          href={institute.website} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="hover:text-blue-600 dark:hover:text-blue-400"
+                        >
+                          Visit Website
+                        </a>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                      <Clock className="w-4 h-4" />
+                      <span>
+                        {institute.operatingHours.monday.isClosed ? 'Closed' : 
+                         `${institute.operatingHours.monday.open} - ${institute.operatingHours.monday.close}`}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex flex-wrap gap-1">
+                      {institute.services.bloodCollection && (
+                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded">
+                          Blood Collection
+                        </span>
+                      )}
+                      {institute.services.emergencyServices && (
+                        <span className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs rounded">
+                          Emergency
+                        </span>
+                      )}
+                      {institute.services.mobileBloodDrive && (
+                        <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded">
+                          Mobile Drive
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Building2 className="w-12 h-12 text-blue-400 mx-auto mb-4" />
+              <p className="text-blue-700 dark:text-blue-300">No blood donation centers found.</p>
             </div>
           )}
         </div>

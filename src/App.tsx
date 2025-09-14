@@ -24,7 +24,6 @@ import RegisterPage from '@/pages/RegisterPage'
 // Admin Pages
 import AdminAnnouncements from '@/pages/admin/AdminAnnouncements'
 import AdminBloodDonation from '@/pages/admin/AdminBloodDonation'
-import AdminBloodDonors from '@/pages/admin/AdminBloodDonors'
 import AdminBloodInstitutes from '@/pages/admin/AdminBloodInstitutes'
 import AdminDashboard from '@/pages/admin/AdminDashboard'
 import AdminDonations from '@/pages/admin/AdminDonations'
@@ -113,7 +112,6 @@ function App() {
           <Route path="events" element={<AdminEvents />} />
           <Route path="historical-moments" element={<AdminHistoricalMoments />} />
           <Route path="slider" element={<AdminSlider />} />
-          <Route path="blood-donors" element={<AdminBloodDonors />} />
           <Route path="blood-institutes" element={<AdminBloodInstitutes />} />
           <Route path="blood-donation" element={<AdminBloodDonation />} />
           <Route path="donations" element={<AdminDonations />} />

@@ -2,23 +2,22 @@ import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils/cn'
 import {
-    Building2,
-    Calendar,
-    Camera,
-    CreditCard,
-    Droplets,
-    Heart,
-    Home,
-    ImageIcon,
-    LogOut,
-    Megaphone,
-    Menu,
-    Moon,
-    Settings,
-    Sun,
-    User,
-    Users,
-    X
+  Building2,
+  Calendar,
+  Camera,
+  CreditCard,
+  Droplets,
+  Heart,
+  Home,
+  ImageIcon,
+  LogOut,
+  Megaphone,
+  Menu,
+  Moon,
+  Settings,
+  Sun,
+  User,
+  X
 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -40,7 +39,6 @@ const AdminLayout = () => {
     { name: 'Events', href: '/admin/events', icon: Calendar, roles: ['admin'] },
     { name: 'Historical Moments', href: '/admin/historical-moments', icon: Camera, roles: ['admin', 'moderator'] },
     { name: 'Slider Management', href: '/admin/slider', icon: ImageIcon, roles: ['admin'] },
-    { name: 'Blood Donors', href: '/admin/blood-donors', icon: Users, roles: ['admin', 'moderator'] },
     { name: 'Blood Institutes', href: '/admin/blood-institutes', icon: Building2, roles: ['admin', 'moderator'] },
     { name: t('bloodDonation.adminTitle'), href: '/admin/blood-donation', icon: Droplets, roles: ['admin'] },
     { name: 'Donation Settings', href: '/admin/donations', icon: Heart, roles: ['admin'] },
