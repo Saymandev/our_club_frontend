@@ -1,11 +1,9 @@
 import { BloodDonorSkeleton } from '@/components/UI/Skeleton'
 import { bloodDonorsApi } from '@/services/api'
-import { useAuthStore } from '@/store/authStore'
 import { Edit, MapPin, Phone, Plus, Trash2, User, Users } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
-import { useTranslation } from 'react-i18next'
 
 interface BloodDonor {
   _id: string
@@ -62,8 +60,6 @@ interface BloodDonorForm {
 }
 
 const AdminBloodDonors: React.FC = () => {
-  const { t } = useTranslation()
-  const { user } = useAuthStore()
   const [donors, setDonors] = useState<BloodDonor[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
