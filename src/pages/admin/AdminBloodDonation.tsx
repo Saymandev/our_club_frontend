@@ -101,11 +101,9 @@ const AdminBloodDonation: React.FC = () => {
 
       // Step 1: Create the user using axios
       const newUser = await authApi.register(userData)
-      console.log('User registration response:', newUser) // Debug log
 
       // Extract user ID from response
       const userId = newUser.data.user._id
-      console.log('Found user ID:', userId)
 
       // Step 2: Update the user's blood donation info using axios
       const bloodData = {
