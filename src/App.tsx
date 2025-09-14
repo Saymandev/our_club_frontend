@@ -32,6 +32,7 @@ import AdminHistoricalMoments from '@/pages/admin/AdminHistoricalMoments'
 import AdminPaymentVerification from '@/pages/admin/AdminPaymentVerification'
 import AdminSettings from '@/pages/admin/AdminSettings'
 import AdminSlider from '@/pages/admin/AdminSlider'
+import AdminUsers from '@/pages/admin/AdminUsers'
 
 // Components
 import ProtectedRoute from '@/components/Auth/ProtectedRoute'
@@ -114,6 +115,7 @@ function App() {
           <Route path="slider" element={<AdminSlider />} />
           <Route path="blood-institutes" element={<AdminBloodInstitutes />} />
           <Route path="blood-donation" element={<AdminBloodDonation />} />
+          <Route path="users" element={<AdminUsers />} />
           <Route path="donations" element={<AdminDonations />} />
           <Route path="payment-verification" element={<AdminPaymentVerification />} />
           <Route path="settings" element={<AdminSettings />} />

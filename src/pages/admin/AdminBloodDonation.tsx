@@ -103,16 +103,9 @@ const AdminBloodDonation: React.FC = () => {
       const newUser = await authApi.register(userData)
       console.log('User registration response:', newUser) // Debug log
 
-      // Extract user ID from response (handle different response structures)
-      let userId
-      if (newUser.data && newUser.data.user && newUser.data.user.id) {
-        userId = newUser.data.user.id
-      } else if (newUser.data && newUser.data.id) {
-        userId = newUser.data.id
-      } else {
-        console.error('Unexpected response structure:', newUser)
-        throw new Error('Could not extract user ID from response')
-      }
+      // Extract user ID from response
+      const userId = newUser.data.user._id
+      console.log('Found user ID:', userId)
 
       // Step 2: Update the user's blood donation info using axios
       const bloodData = {

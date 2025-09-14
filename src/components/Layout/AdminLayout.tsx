@@ -17,6 +17,7 @@ import {
   Settings,
   Sun,
   User,
+  Users,
   X
 } from 'lucide-react'
 import { useState } from 'react'
@@ -41,6 +42,7 @@ const AdminLayout = () => {
     { name: 'Slider Management', href: '/admin/slider', icon: ImageIcon, roles: ['admin'] },
     { name: 'Blood Institutes', href: '/admin/blood-institutes', icon: Building2, roles: ['admin', 'moderator'] },
     { name: t('bloodDonation.adminTitle'), href: '/admin/blood-donation', icon: Droplets, roles: ['admin'] },
+    { name: 'User Management', href: '/admin/users', icon: Users, roles: ['admin'] },
     { name: 'Donation Settings', href: '/admin/donations', icon: Heart, roles: ['admin'] },
     { name: 'Payment Verification', href: '/admin/payment-verification', icon: CreditCard, roles: ['admin'] },
     { name: 'Settings', href: '/admin/settings', icon: Settings, roles: ['admin'] },

@@ -124,6 +124,20 @@ export const authApi = {
   getMe: createOfflineAwareAPI(() => api.get('/auth/me')),
   updatePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.put('/auth/update-password', data),
+  getUsers: createOfflineAwareAPI((params?: {
+    role?: string
+    isActive?: string
+    bloodGroup?: string
+    page?: number
+    limit?: number
+  }) => api.get('/auth/admin/users', { params })),
+  updateUser: (id: string, data: {
+    username?: string
+    email?: string
+    role?: string
+    password?: string
+    isActive?: boolean
+  }) => api.put(`/auth/admin/users/${id}`, data),
 }
 
 // Announcements API
