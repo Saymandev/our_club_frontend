@@ -25,6 +25,7 @@ const AdminBloodDonation: React.FC = () => {
   const [addForm, setAddForm] = useState({
     username: '',
     email: '',
+    password: '',
     bloodGroup: '',
     contactNumber: '',
     lastDonationDate: ''
@@ -90,25 +91,65 @@ const AdminBloodDonation: React.FC = () => {
     e.preventDefault()
     
     try {
-      // Create a new user with blood donation info
-      // Note: This would require a new API endpoint to create users with blood info
-      // For now, we'll show a message that this feature needs backend support
-      toast.error('This feature requires backend support. Please create users through the user management system first.')
-      
-      // TODO: Implement API call to create new user with blood donation info
-      // await bloodDonationApi.createDonor(addForm)
-      
+      // Create a new user first, then update their blood info
+      const userData = {
+        username: addForm.username,
+        email: addForm.email,
+        password: addForm.password,
+        role: 'user'
+      }
+
+      // Step 1: Create the user
+      const userResponse = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+      })
+
+      if (!userResponse.ok) {
+        const errorData = await userResponse.json()
+        throw new Error(errorData.message || 'Failed to create user')
+      }
+
+      const newUser = await userResponse.json()
+
+      // Step 2: Update the user's blood donation info
+      const bloodData = {
+        bloodGroup: addForm.bloodGroup,
+        contactNumber: addForm.contactNumber,
+        lastDonationDate: addForm.lastDonationDate || null
+      }
+
+      const bloodResponse = await fetch(`/api/blood-donation/admin/users/${newUser.data.user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(bloodData)
+      })
+
+      if (!bloodResponse.ok) {
+        const errorData = await bloodResponse.json()
+        throw new Error(errorData.message || 'Failed to update blood info')
+      }
+
+      toast.success('Blood donor created successfully!')
       setShowAddModal(false)
       setAddForm({
         username: '',
         email: '',
+        password: '',
         bloodGroup: '',
         contactNumber: '',
         lastDonationDate: ''
       })
       fetchDonors() // Refresh the list
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to create donor')
+      console.error('Error creating donor:', error)
+      toast.error(error.message || 'Failed to create donor')
     }
   }
 
@@ -465,6 +506,20 @@ const AdminBloodDonation: React.FC = () => {
                   onChange={(e) => setAddForm(prev => ({ ...prev, email: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Enter email"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Password *
+                </label>
+                <input
+                  type="password"
+                  value={addForm.password}
+                  onChange={(e) => setAddForm(prev => ({ ...prev, password: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Enter password"
                   required
                 />
               </div>
