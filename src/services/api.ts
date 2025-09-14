@@ -269,6 +269,92 @@ export const bloodDonationApi = {
     api.post(`/blood-donation/admin/users/${userId}/reset-availability`),
 }
 
+// Enhanced Blood Donors API
+export const bloodDonorsApi = {
+  // Public routes
+  getAll: createOfflineAwareAPI((params?: {
+    bloodGroup?: string
+    city?: string
+    state?: string
+    isAvailable?: string
+    status?: string
+    search?: string
+    page?: number
+    limit?: number
+  }) => api.get('/blood-donors', { params })),
+  
+  getById: createOfflineAwareAPI((id: string) => api.get(`/blood-donors/${id}`)),
+  
+  getAvailableByBloodGroup: createOfflineAwareAPI((bloodGroup: string, params?: {
+    city?: string
+    state?: string
+    limit?: number
+  }) => api.get(`/blood-donors/available/${bloodGroup}`, { params })),
+  
+  getStatistics: createOfflineAwareAPI(() => api.get('/blood-donors/statistics')),
+  
+  getCompatibility: createOfflineAwareAPI((donorBloodGroup: string, recipientBloodGroup: string) => 
+    api.get('/blood-donors/compatibility', { 
+      params: { donorBloodGroup, recipientBloodGroup } 
+    })),
+  
+  // Admin routes
+  create: (data: any) => api.post('/blood-donors', data),
+  update: (id: string, data: any) => api.put(`/blood-donors/${id}`, data),
+  delete: (id: string) => api.delete(`/blood-donors/${id}`),
+  bulkImport: (donors: any[]) => api.post('/blood-donors/bulk-import', { donors }),
+  recordDonation: (id: string, data: {
+    instituteId: string
+    volume?: number
+    notes?: string
+  }) => api.post(`/blood-donors/${id}/donations`, data),
+}
+
+// Blood Institutes API
+export const bloodInstitutesApi = {
+  // Public routes
+  getAll: createOfflineAwareAPI((params?: {
+    type?: string
+    city?: string
+    state?: string
+    hasEmergencyServices?: string
+    isOpen?: string
+    status?: string
+    search?: string
+    page?: number
+    limit?: number
+  }) => api.get('/blood-institutes', { params })),
+  
+  getById: createOfflineAwareAPI((id: string) => api.get(`/blood-institutes/${id}`)),
+  
+  getNearby: createOfflineAwareAPI((params: {
+    latitude: number
+    longitude: number
+    radius?: number
+    limit?: number
+  }) => api.get('/blood-institutes/nearby', { params })),
+  
+  getOpen: createOfflineAwareAPI((params?: {
+    city?: string
+    state?: string
+  }) => api.get('/blood-institutes/open', { params })),
+  
+  getBloodAvailability: createOfflineAwareAPI((params?: {
+    bloodGroup?: string
+    city?: string
+    state?: string
+  }) => api.get('/blood-institutes/blood-availability', { params })),
+  
+  getStatistics: createOfflineAwareAPI(() => api.get('/blood-institutes/statistics')),
+  
+  // Admin routes
+  create: (data: any) => api.post('/blood-institutes', data),
+  update: (id: string, data: any) => api.put(`/blood-institutes/${id}`, data),
+  delete: (id: string) => api.delete(`/blood-institutes/${id}`),
+  verify: (id: string, isVerified: boolean) => api.patch(`/blood-institutes/${id}/verify`, { isVerified }),
+  updateInventory: (id: string, bloodInventory: any[]) => api.put(`/blood-institutes/${id}/inventory`, { bloodInventory }),
+}
+
 // Events API
 export const eventsApi = {
   // Public routes
