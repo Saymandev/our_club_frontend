@@ -109,11 +109,22 @@ const AdminBloodDonation: React.FC = () => {
       })
 
       if (!userResponse.ok) {
-        const errorData = await userResponse.json()
-        throw new Error(errorData.message || 'Failed to create user')
+        let errorMessage = 'Failed to create user'
+        try {
+          const errorData = await userResponse.json()
+          errorMessage = errorData.message || errorMessage
+        } catch (e) {
+          errorMessage = `HTTP ${userResponse.status}: ${userResponse.statusText}`
+        }
+        throw new Error(errorMessage)
       }
 
-      const newUser = await userResponse.json()
+      let newUser
+      try {
+        newUser = await userResponse.json()
+      } catch (e) {
+        throw new Error('Invalid response from server')
+      }
 
       // Step 2: Update the user's blood donation info
       const bloodData = {
@@ -132,8 +143,14 @@ const AdminBloodDonation: React.FC = () => {
       })
 
       if (!bloodResponse.ok) {
-        const errorData = await bloodResponse.json()
-        throw new Error(errorData.message || 'Failed to update blood info')
+        let errorMessage = 'Failed to update blood info'
+        try {
+          const errorData = await bloodResponse.json()
+          errorMessage = errorData.message || errorMessage
+        } catch (e) {
+          errorMessage = `HTTP ${bloodResponse.status}: ${bloodResponse.statusText}`
+        }
+        throw new Error(errorMessage)
       }
 
       toast.success('Blood donor created successfully!')
@@ -149,6 +166,7 @@ const AdminBloodDonation: React.FC = () => {
       fetchDonors() // Refresh the list
     } catch (error: any) {
       console.error('Error creating donor:', error)
+      console.error('Add form data:', addForm)
       toast.error(error.message || 'Failed to create donor')
     }
   }
