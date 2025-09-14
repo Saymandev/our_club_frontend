@@ -66,7 +66,6 @@ const AdminExams: React.FC = () => {
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ExamFormData>()
 
-  const examType = watch('type')
   const questions = watch('questions') || []
 
   const fetchExams = async () => {
