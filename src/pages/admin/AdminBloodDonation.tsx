@@ -1,5 +1,5 @@
 import { BloodDonorSkeleton } from '@/components/UI/Skeleton'
-import { bloodDonationApi } from '@/services/api'
+import { authApi, bloodDonationApi } from '@/services/api'
 import { User } from '@/store/authStore'
 import { Edit, Plus, RotateCcw } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
@@ -99,59 +99,29 @@ const AdminBloodDonation: React.FC = () => {
         role: 'user'
       }
 
-      // Step 1: Create the user
-      const userResponse = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData)
-      })
+      // Step 1: Create the user using axios
+      const newUser = await authApi.register(userData)
+      console.log('User registration response:', newUser) // Debug log
 
-      if (!userResponse.ok) {
-        let errorMessage = 'Failed to create user'
-        try {
-          const errorData = await userResponse.json()
-          errorMessage = errorData.message || errorMessage
-        } catch (e) {
-          errorMessage = `HTTP ${userResponse.status}: ${userResponse.statusText}`
-        }
-        throw new Error(errorMessage)
+      // Extract user ID from response (handle different response structures)
+      let userId
+      if (newUser.data && newUser.data.user && newUser.data.user.id) {
+        userId = newUser.data.user.id
+      } else if (newUser.data && newUser.data.id) {
+        userId = newUser.data.id
+      } else {
+        console.error('Unexpected response structure:', newUser)
+        throw new Error('Could not extract user ID from response')
       }
 
-      let newUser
-      try {
-        newUser = await userResponse.json()
-      } catch (e) {
-        throw new Error('Invalid response from server')
-      }
-
-      // Step 2: Update the user's blood donation info
+      // Step 2: Update the user's blood donation info using axios
       const bloodData = {
         bloodGroup: addForm.bloodGroup,
         contactNumber: addForm.contactNumber,
-        lastDonationDate: addForm.lastDonationDate || null
+        lastDonationDate: addForm.lastDonationDate || undefined
       }
 
-      const bloodResponse = await fetch(`/api/blood-donation/admin/users/${newUser.data.user.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(bloodData)
-      })
-
-      if (!bloodResponse.ok) {
-        let errorMessage = 'Failed to update blood info'
-        try {
-          const errorData = await bloodResponse.json()
-          errorMessage = errorData.message || errorMessage
-        } catch (e) {
-          errorMessage = `HTTP ${bloodResponse.status}: ${bloodResponse.statusText}`
-        }
-        throw new Error(errorMessage)
-      }
+      await bloodDonationApi.adminUpdateBloodInfo(userId, bloodData)
 
       toast.success('Blood donor created successfully!')
       setShowAddModal(false)
@@ -167,7 +137,7 @@ const AdminBloodDonation: React.FC = () => {
     } catch (error: any) {
       console.error('Error creating donor:', error)
       console.error('Add form data:', addForm)
-      toast.error(error.message || 'Failed to create donor')
+      toast.error(error.response?.data?.message || error.message || 'Failed to create donor')
     }
   }
 
