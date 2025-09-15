@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 // Create axios instances
 const api = axios.create({
   baseURL: 'https://our-club-backend.onrender.com/api',
-  timeout: 30000,
+  timeout: 100000,
   headers: {
     'Content-Type': 'application/json',
   },
