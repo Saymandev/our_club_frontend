@@ -1,6 +1,7 @@
 import { BookOpen, CheckCircle, ChevronRight, Clock, Play, User } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import VideoPlayer from '../components/VideoPlayer'
 import { chaptersApi, coursesApi, subjectsApi, videosApi } from '../services/api'
 
 interface Course {
@@ -35,6 +36,8 @@ interface Video {
   title: string
   description: string
   videoUrl: string
+  videoType: 'upload' | 'youtube'
+  youtubeVideoId?: string
   duration: number
   order: number
   userProgress?: {
@@ -272,18 +275,11 @@ const CourseDetailPage: React.FC = () => {
             {selectedVideo ? (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
                 <div className="aspect-video bg-black rounded-t-lg">
-                  <video
-                    key={selectedVideo._id}
+                  <VideoPlayer
+                    video={selectedVideo}
+                    onTimeUpdate={updateVideoProgress}
                     className="w-full h-full"
-                    controls
-                    onTimeUpdate={(e) => {
-                      const video = e.target as HTMLVideoElement
-                      updateVideoProgress(selectedVideo._id, Math.floor(video.currentTime))
-                    }}
-                  >
-                    <source src={selectedVideo.videoUrl} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
+                  />
                 </div>
                 <div className="p-6">
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">

@@ -1,7 +1,8 @@
-import { BookOpen, Clock, Edit, Eye, EyeOff, FileVideo, Plus, Trash2, User, X } from 'lucide-react'
+import { BookOpen, Clock, Edit, Eye, EyeOff, FileVideo, Plus, Trash2, User, X, Youtube } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
+import YouTubeUploader from '../../components/YouTubeUploader'
 import { chaptersApi, coursesApi, subjectsApi, uploadApi, videosApi } from '../../services/api'
 
 interface Course {
@@ -38,12 +39,16 @@ const AdminCourses: React.FC = () => {
   const [uploading, setUploading] = useState(false)
   const [updating, setUpdating] = useState(false)
   const [uploadedVideos, setUploadedVideos] = useState<Array<{
-    file: File
+    file?: File
     url: string
     duration: number
     title: string
     description: string
+    videoType: 'upload' | 'youtube'
+    youtubeVideoId?: string
+    youtubeUrl?: string
   }>>([])
+  const [showYouTubeUploader, setShowYouTubeUploader] = useState(false)
   const [filters, setFilters] = useState({
     search: '',
     level: '',
@@ -155,6 +160,9 @@ const AdminCourses: React.FC = () => {
             title: video.title,
             description: video.description,
             videoUrl: video.url,
+            videoType: video.videoType,
+            youtubeVideoId: video.youtubeVideoId,
+            youtubeUrl: video.youtubeUrl,
             duration: video.duration,
             order: j + 1,
             isActive: true
@@ -537,7 +545,10 @@ const AdminCourses: React.FC = () => {
                   url: video.videoUrl,
                   duration: video.duration,
                   title: video.title,
-                  description: video.description || ''
+                  description: video.description || '',
+                  videoType: video.videoType || 'upload',
+                  youtubeVideoId: video.youtubeVideoId,
+                  youtubeUrl: video.youtubeUrl
                 })
               })
             } catch (error) {
@@ -622,7 +633,8 @@ const AdminCourses: React.FC = () => {
               url: videoUrl,
               duration,
               title: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
-              description: ''
+              description: '',
+              videoType: 'upload' as const
             })
           }
           video.src = videoUrl
@@ -727,6 +739,27 @@ const AdminCourses: React.FC = () => {
     ))
     
   }
+
+  const handleYouTubeUploadComplete = (videoData: {
+    videoId: string;
+    url: string;
+    title: string;
+    description: string;
+    duration: number;
+  }) => {
+    const newVideo = {
+      url: videoData.url,
+      duration: videoData.duration,
+      title: videoData.title,
+      description: videoData.description,
+      videoType: 'youtube' as const,
+      youtubeVideoId: videoData.videoId,
+      youtubeUrl: videoData.url
+    };
+
+    setUploadedVideos(prev => [...prev, newVideo]);
+    toast.success(`"${videoData.title}" uploaded to YouTube and added to course`);
+  };
 
   const clearAllVideos = async () => {
     if (uploadedVideos.length === 0) {
@@ -1030,7 +1063,19 @@ const AdminCourses: React.FC = () => {
 
               {/* Video Upload Section */}
               <div className="border-t border-gray-200 dark:border-gray-600 pt-3">
-                <h3 className="text-base font-medium text-gray-900 dark:text-white mb-2">Course Videos</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-medium text-gray-900 dark:text-white">Course Videos</h3>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowYouTubeUploader(true)}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center gap-2 text-sm"
+                    >
+                      <Youtube className="w-4 h-4" />
+                      Upload to YouTube
+                    </button>
+                  </div>
+                </div>
                 
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3 text-center">
                   <FileVideo className="w-5 h-5 text-gray-400 mx-auto mb-1" />
@@ -1071,24 +1116,42 @@ const AdminCourses: React.FC = () => {
                       {uploadedVideos.map((video, index) => (
                         <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded p-2">
                           <div className="flex items-center gap-2">
-                            <video
-                              src={video.url}
-                              className="w-12 h-8 object-cover rounded flex-shrink-0"
-                              muted
-                              preload="metadata"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <input
-                                type="text"
-                                value={video.title}
-                                onChange={(e) => updateVideoDetails(index, 'title', e.target.value)}
-                                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
-                                placeholder="Video title (e.g., 'Chapter 1: Introduction')"
+                            {video.videoType === 'youtube' && video.youtubeVideoId ? (
+                              <img
+                                src={`https://img.youtube.com/vi/${video.youtubeVideoId}/hqdefault.jpg`}
+                                alt={video.title}
+                                className="w-12 h-8 object-cover rounded flex-shrink-0"
                               />
-                              <div className="flex items-center gap-2 mt-1">
+                            ) : (
+                              <video
+                                src={video.url}
+                                className="w-12 h-8 object-cover rounded flex-shrink-0"
+                                muted
+                                preload="metadata"
+                              />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1 mb-1">
+                                <input
+                                  type="text"
+                                  value={video.title}
+                                  onChange={(e) => updateVideoDetails(index, 'title', e.target.value)}
+                                  className="flex-1 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                                  placeholder="Video title (e.g., 'Chapter 1: Introduction')"
+                                />
+                                {video.videoType === 'youtube' && (
+                                  <Youtube className="w-3 h-3 text-red-600 flex-shrink-0" />
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
                                 <span className="text-xs text-gray-500 dark:text-gray-400">
                                   {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}
                                 </span>
+                                {video.videoType === 'youtube' && (
+                                  <span className="text-xs text-red-600 dark:text-red-400 font-medium">
+                                    YouTube
+                                  </span>
+                                )}
                               </div>
                             </div>
                             <button
@@ -1151,6 +1214,13 @@ const AdminCourses: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* YouTube Uploader Modal */}
+      <YouTubeUploader
+        isOpen={showYouTubeUploader}
+        onClose={() => setShowYouTubeUploader(false)}
+        onUploadComplete={handleYouTubeUploadComplete}
+      />
     </div>
   )
 }
