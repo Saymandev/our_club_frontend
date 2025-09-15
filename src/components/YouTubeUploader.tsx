@@ -72,7 +72,7 @@ const YouTubeUploader: React.FC<YouTubeUploaderProps> = ({
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('/api/youtube/upload', {
+      const response = await fetch('https://our-club-backend.onrender.com/api/youtube/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
