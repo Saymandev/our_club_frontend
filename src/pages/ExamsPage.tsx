@@ -102,7 +102,7 @@ const ExamsPage: React.FC = () => {
   const canTakeExam = (exam: Exam) => {
     if (!isExamAvailable(exam)) return false
     if (exam.attemptsAllowed === 0) return true // Unlimited attempts
-    return exam.userAttempts < exam.attemptsAllowed
+    return (exam.userAttempts || 0) < exam.attemptsAllowed
   }
 
   const getExamStatus = (exam: Exam) => {
@@ -124,8 +124,8 @@ const ExamsPage: React.FC = () => {
       return { status: 'passed', message: `Passed (${exam.lastResult.percentage}%)` }
     }
     
-    if (exam.userAttempts > 0) {
-      return { status: 'in_progress', message: `Attempt ${exam.userAttempts + 1} available` }
+    if ((exam.userAttempts || 0) > 0) {
+      return { status: 'in_progress', message: `Attempt ${(exam.userAttempts || 0) + 1} available` }
     }
     
     return { status: 'available', message: 'Ready to take' }
@@ -253,12 +253,12 @@ const ExamsPage: React.FC = () => {
                         <Clock className="w-4 h-4 mr-2" />
                         <span>{formatDuration(exam.timeLimit)}</span>
                       </div>
-                      {exam.attemptsAllowed > 0 && (
-                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                          <Users className="w-4 h-4 mr-2" />
-                          <span>Attempts: {exam.userAttempts}/{exam.attemptsAllowed}</span>
-                        </div>
-                      )}
+                       {exam.attemptsAllowed > 0 && (
+                         <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                           <Users className="w-4 h-4 mr-2" />
+                           <span>Attempts: {exam.userAttempts || 0}/{exam.attemptsAllowed}</span>
+                         </div>
+                       )}
                     </div>
 
                     {/* Status */}
