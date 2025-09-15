@@ -1,6 +1,7 @@
 import { Loader, Upload, X, Youtube } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import api from '../services/api';
 
 interface YouTubeUploaderProps {
   isOpen: boolean;
@@ -66,21 +67,14 @@ const YouTubeUploader: React.FC<YouTubeUploaderProps> = ({
       formData.append('description', description);
       formData.append('privacyStatus', privacyStatus);
 
-      // Get access token from localStorage or auth context
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await fetch('https://our-club-backend.onrender.com/api/youtube/upload', {
-        method: 'POST',
+      // Use axios with proper authentication (handled by interceptors)
+      const response = await api.post('/youtube/upload', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      const result = await response.json();
+      const result = response.data;
 
       if (result.success) {
         // Get video duration (you might want to implement this)
