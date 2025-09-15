@@ -206,30 +206,25 @@ const AdminCourses: React.FC = () => {
 
   const updateCourseStructure = async (courseId: string, videos: typeof uploadedVideos) => {
     try {
-      console.log(`=== UPDATING COURSE STRUCTURE ===`)
-      console.log(`Course ID: ${courseId}`)
-      console.log(`Videos to keep: ${videos.length}`)
-      videos.forEach((video, index) => {
-        console.log(`  ${index + 1}. ${video.title} (${video.duration}s)`)
-      })
+     
+      
       
       // Step 1: Get current structure to compare
-      console.log('Step 1: Getting current course structure')
-      const currentSubjectsResponse = await subjectsApi.getByCourse(courseId)
-      const currentSubjects = currentSubjectsResponse.data.data || []
-      console.log(`Current subjects: ${currentSubjects.length}`)
+      
+      
+     
       
       // Step 2: ALWAYS delete ALL existing structure completely first
-      console.log('Step 2: Deleting ALL existing course structure')
+      
       try {
         await deleteExistingCourseStructure(courseId)
-        console.log('✅ Existing course structure deleted successfully')
+       
       } catch (deletionError: any) {
-        console.log('❌ Deletion failed:', deletionError.message)
+        
         // If deletion fails, we still need to try to clean up
         // Try a more aggressive cleanup approach
         try {
-          console.log('🔄 Attempting aggressive cleanup...')
+          
           // Get all subjects and try to delete them one by one
           const aggressiveCleanupResponse = await subjectsApi.getByCourse(courseId)
           const subjectsToDelete = aggressiveCleanupResponse.data.data || []
@@ -252,78 +247,78 @@ const AdminCourses: React.FC = () => {
                       await videosApi.deleteProgress(video._id)
                       await videosApi.delete(video._id)
                     } catch (e) {
-                      console.log(`Failed to delete video ${video._id}, continuing...`)
+                      
                     }
                   }
                   
                   // Delete chapter
                   await chaptersApi.delete(chapter._id)
                 } catch (e) {
-                  console.log(`Failed to delete chapter ${chapter._id}, continuing...`)
+                  
                 }
               }
               
               // Delete subject
               await subjectsApi.delete(subject._id)
             } catch (e) {
-              console.log(`Failed to delete subject ${subject._id}, continuing...`)
+              
             }
           }
           
-          console.log('✅ Aggressive cleanup completed')
+          
         } catch (aggressiveError: any) {
-          console.log('❌ Aggressive cleanup also failed:', aggressiveError.message)
+          
           // Continue anyway - we'll try to create new structure
         }
       }
       
       // Step 3: Wait to ensure deletion is complete
-      console.log('Step 3: Waiting for deletion to complete')
+      
       await new Promise(resolve => setTimeout(resolve, 3000))
       
       // Step 4: Verify deletion
-      console.log('Step 4: Verifying deletion')
+      
       const deletedCheckResponse = await subjectsApi.getByCourse(courseId)
       const deletedSubjects = deletedCheckResponse.data.data || []
-      console.log(`Subjects after deletion: ${deletedSubjects.length}`)
+      
       
       if (deletedSubjects.length > 0) {
-        console.log('⚠️ Warning: Some subjects still exist after deletion')
+        
         // Don't return - continue with creation to overwrite
       }
       
       // Step 5: Create new structure ONLY if there are videos to add
       if (videos.length > 0) {
-        console.log('Step 5: Creating new course structure with videos')
+        
         await createCourseStructure(courseId, videos)
       } else {
-        console.log('Step 5: No videos to create - course structure should be cleaned')
+        
       }
 
       // Step 6: Final verification
-      console.log('Step 6: Final verification')
+      
       const finalCheckResponse = await subjectsApi.getByCourse(courseId)
       const finalSubjects = finalCheckResponse.data.data || []
-      console.log(`Final subjects count: ${finalSubjects.length}`)
+      
 
       if (videos.length === 0) {
         if (finalSubjects.length === 0) {
-          console.log('✅ Success: All videos removed, course structure cleaned')
+          
           toast.success('All videos removed successfully!')
         } else {
-          console.log('⚠️ Some subjects remain after video removal')
+          
           toast.success('Videos removed! (Some structure may remain - this is normal)')
         }
       } else if (videos.length > 0) {
         if (finalSubjects.length > 0) {
-          console.log('✅ Success: Course structure updated with new videos')
+          
           toast.success('Course videos updated successfully!')
         } else {
-          console.log('⚠️ No subjects found after video creation')
+          
           toast.success('Course videos updated!')
         }
       } else {
-        console.log('✅ Update completed')
+        
         toast.success('Course updated successfully!')
       }
     } catch (error: any) {
@@ -334,24 +329,24 @@ const AdminCourses: React.FC = () => {
 
   const deleteUserProgressForVideo = async (videoId: string) => {
     try {
-      console.log(`=== DELETING VIDEO: ${videoId} ===`)
+     
       
       // Step 1: Try to delete user progress records for this video
-      console.log(`Step 1: Attempting to delete user progress for video: ${videoId}`)
+      
       let progressDeleted = false
       try {
-        const progressResponse = await videosApi.deleteProgress(videoId)
-        console.log(`✅ User progress deleted: ${progressResponse.data.data?.deletedCount || 0} records`)
+        
+        
         progressDeleted = true
       } catch (progressError: any) {
-        console.log(`⚠️ Progress deletion failed: ${progressError.response?.status} - ${progressError.response?.data?.message || progressError.message}`)
+        
         
         // If it's a 404, there might be no progress records
         if (progressError.response?.status === 404) {
-          console.log(`ℹ️ No progress records found for video ${videoId}`)
+         
           progressDeleted = true // Consider this as "success" since there's nothing to delete
         } else if (progressError.response?.status === 403 || progressError.response?.status === 401) {
-          console.log(`⚠️ Insufficient permissions to delete progress, continuing with video deletion`)
+          
           // Don't set progressDeleted = true, we'll try to delete video anyway
         }
       }
@@ -362,22 +357,22 @@ const AdminCourses: React.FC = () => {
       }
       
       // Step 3: Delete the video itself
-      console.log(`Step 2: Deleting video: ${videoId}`)
+      
       const response = await videosApi.delete(videoId)
-      console.log(`✅ Video deleted successfully: ${videoId}`)
+      
       return response
     } catch (error: any) {
-      console.log(`❌ Error in deleteUserProgressForVideo for ${videoId}:`, error.response?.status, error.response?.data?.message || error.message)
+      
       
       // If it's a progress-related error, try to delete video anyway
       if (error.response?.data?.message?.includes('user progress') || error.response?.data?.message?.includes('existing')) {
-        console.log(`🔄 Retrying video deletion without progress check...`)
+        
         try {
           const response = await videosApi.delete(videoId)
-          console.log(`✅ Video deleted on retry: ${videoId}`)
+          
           return response
         } catch (retryError: any) {
-          console.log(`❌ Retry also failed: ${retryError.response?.data?.message || retryError.message}`)
+          
           throw retryError
         }
       }
@@ -388,17 +383,16 @@ const AdminCourses: React.FC = () => {
 
   const deleteExistingCourseStructure = async (courseId: string) => {
     try {
-      console.log('=== STARTING COURSE STRUCTURE DELETION ===')
-      console.log('Deleting existing course structure for:', courseId)
+      
       
       // Get subjects directly
       const subjectsResponse = await subjectsApi.getByCourse(courseId)
       const subjects = subjectsResponse.data.data || []
       
-      console.log(`Found ${subjects.length} subjects to delete`)
+     
       
       if (subjects.length === 0) {
-        console.log('✅ No subjects found - course structure already clean')
+        
         return
       }
       
@@ -409,65 +403,62 @@ const AdminCourses: React.FC = () => {
       // Delete all videos, chapters, and subjects
       for (const subject of subjects) {
         try {
-          console.log(`--- Processing subject: ${subject.title} (${subject._id}) ---`)
+         
           
           // Get chapters for this subject
           const chaptersResponse = await chaptersApi.getBySubject(subject._id)
           const chapters = chaptersResponse.data.data || []
           
-          console.log(`Found ${chapters.length} chapters in subject`)
+         
           
           for (const chapter of chapters) {
             try {
-              console.log(`  Processing chapter: ${chapter.title} (${chapter._id})`)
+              
               
               // Get videos for this chapter
               const videosResponse = await videosApi.getByChapter(chapter._id)
               const videos = videosResponse.data.data || []
               
-              console.log(`  Found ${videos.length} videos in chapter`)
+             
               
               // Delete all videos in this chapter
               for (const video of videos) {
                 try {
-                  console.log(`    Deleting video: ${video.title} (${video._id})`)
+                  
                   
                   // Try to delete video with user progress handling
                   await deleteUserProgressForVideo(video._id)
                   deletedVideos++
-                  console.log(`    ✅ Video deleted successfully: ${video._id}`)
+                 
                 } catch (error: any) {
-                  console.log(`    ❌ Error deleting video ${video._id}:`, error.response?.status, error.response?.data?.message || error.message)
+                 
                   
-                  // Continue with other videos even if one fails
-                  console.log(`    ⚠️ Continuing with other videos...`)
+                 
                 }
               }
               
               // Delete the chapter
-              console.log(`  Deleting chapter: ${chapter._id}`)
-              await chaptersApi.delete(chapter._id)
+              
               deletedChapters++
-              console.log(`  ✅ Chapter deleted successfully: ${chapter._id}`)
+              
             } catch (error: any) {
-              console.log(`  ❌ Error deleting chapter ${chapter._id}:`, error.response?.status, error.response?.data?.message || error.message)
+              
               // Continue with other chapters even if one fails
             }
           }
           
           // Delete the subject
-          console.log(`Deleting subject: ${subject._id}`)
+          
           await subjectsApi.delete(subject._id)
           deletedSubjects++
-          console.log(`✅ Subject deleted successfully: ${subject._id}`)
+          
         } catch (error: any) {
-          console.log(`❌ Error deleting subject ${subject._id}:`, error.response?.status, error.response?.data?.message || error.message)
+          
           // Continue with other subjects even if one fails
         }
       }
       
-      console.log('=== COURSE STRUCTURE DELETION SUMMARY ===')
-      console.log(`Deleted: ${deletedSubjects} subjects, ${deletedChapters} chapters, ${deletedVideos} videos`)
+      
       
       // Wait a moment for all deletions to complete
       await new Promise(resolve => setTimeout(resolve, 1000))
@@ -475,16 +466,16 @@ const AdminCourses: React.FC = () => {
       // Verify deletion by checking if any subjects remain
       const verificationResponse = await subjectsApi.getByCourse(courseId)
       const remainingSubjects = verificationResponse.data.data || []
-      console.log(`Verification: ${remainingSubjects.length} subjects remain after deletion`)
+      
       
       if (remainingSubjects.length > 0) {
-        console.log('⚠️ Warning: Some subjects could not be deleted')
+        
         throw new Error(`Failed to delete ${remainingSubjects.length} subjects. Please try again or contact support.`)
       } else {
-        console.log('✅ All subjects successfully deleted')
+        
       }
     } catch (error: any) {
-      console.log('❌ Error in deleteExistingCourseStructure:', error.message || error.response?.data?.message || error.message)
+      
       throw error // Re-throw to be handled by calling function
     }
   }
@@ -504,8 +495,7 @@ const AdminCourses: React.FC = () => {
     try {
       await loadCourseStructure(course._id)
     } catch (error) {
-      console.log('Failed to load course structure, starting with empty videos')
-      setUploadedVideos([])
+      
     }
     
     setShowModal(true)
@@ -513,33 +503,33 @@ const AdminCourses: React.FC = () => {
 
   const loadCourseStructure = async (courseId: string) => {
     try {
-      console.log('Loading course structure for:', courseId)
+     
       
       // Try to load subjects directly instead of using the complex getCourseById
       const subjectsResponse = await subjectsApi.getByCourse(courseId)
-      console.log('Subjects response:', subjectsResponse.data)
+     
       
       const subjects = subjectsResponse.data.data || []
-      console.log('Subjects found:', subjects.length)
+      
       
       // Extract all videos from the course structure
       const existingVideos: typeof uploadedVideos = []
       
       // Load chapters and videos for each subject
       for (const subject of subjects) {
-        console.log(`Loading chapters for subject:`, subject.title)
+        
         try {
           const chaptersResponse = await chaptersApi.getBySubject(subject._id)
           const chapters = chaptersResponse.data.data || []
           
           for (const chapter of chapters) {
-            console.log(`Loading videos for chapter:`, chapter.title)
+           
             try {
               const videosResponse = await videosApi.getByChapter(chapter._id)
               const videos = videosResponse.data.data || []
               
               videos.forEach((video: any) => {
-                console.log(`Found video:`, video.title)
+               
                 // Create a proper File object with the video URL as content
                 const dummyFile = new File([''], video.title, { type: 'video/mp4' })
                 existingVideos.push({
@@ -551,23 +541,23 @@ const AdminCourses: React.FC = () => {
                 })
               })
             } catch (error) {
-              console.log(`Error loading videos for chapter ${chapter._id}:`, error)
+              
             }
           }
         } catch (error) {
-          console.log(`Error loading chapters for subject ${subject._id}:`, error)
+         
         }
       }
       
       setUploadedVideos(existingVideos)
-      console.log(`Loaded ${existingVideos.length} videos from course structure`)
+      
     } catch (error: any) {
       console.error('Failed to load course structure:', error)
       console.error('Error details:', error.response?.data)
       
       // If course has no structure yet, that's okay - just start with empty videos
       setUploadedVideos([])
-      console.log('Starting with empty video list due to error')
+      
       
       // Show user-friendly message
       if (error.response?.status === 500) {
@@ -665,9 +655,7 @@ const AdminCourses: React.FC = () => {
   }
 
   const removeVideo = async (index: number) => {
-    console.log(`Attempting to remove video at index: ${index}`)
-    console.log(`Total videos: ${uploadedVideos.length}`)
-    console.log(`Videos:`, uploadedVideos.map((v, i) => `${i}: ${v.title}`))
+   
     
     if (index < 0 || index >= uploadedVideos.length) {
       console.error(`Invalid index: ${index}. Video list length: ${uploadedVideos.length}`)
@@ -686,7 +674,7 @@ const AdminCourses: React.FC = () => {
       try {
         // If we're editing an existing course and the video has a URL (meaning it exists in the database)
         if (editingCourse && video.url && video.url.startsWith('http')) {
-          console.log(`Deleting video from database: ${video.title}`)
+         
           
           // Find the video in the database by searching through the course structure
           const subjectsResponse = await subjectsApi.getByCourse(editingCourse._id)
@@ -703,7 +691,7 @@ const AdminCourses: React.FC = () => {
               
               const dbVideo = videos.find((v: any) => v.videoUrl === video.url)
               if (dbVideo) {
-                console.log(`Found video in database: ${dbVideo._id}`)
+                
                 await deleteUserProgressForVideo(dbVideo._id)
                 await videosApi.delete(dbVideo._id)
                 videoFound = true
@@ -714,15 +702,14 @@ const AdminCourses: React.FC = () => {
           }
           
           if (!videoFound) {
-            console.log(`Video not found in database, removing from local state only`)
+            
           }
         }
         
         // Remove from local state
         setUploadedVideos(prev => {
           const newVideos = prev.filter((_, i) => i !== index)
-          console.log(`Removed video: ${video.title} (index: ${index})`)
-          console.log(`Remaining videos:`, newVideos.map((v, i) => `${i}: ${v.title}`))
+         
           return newVideos
         })
         
@@ -738,7 +725,7 @@ const AdminCourses: React.FC = () => {
     setUploadedVideos(prev => prev.map((video, i) => 
       i === index ? { ...video, [field]: value } : video
     ))
-    console.log(`Updated video ${index} ${field} to: ${value}`)
+    
   }
 
   const clearAllVideos = async () => {
@@ -751,10 +738,10 @@ const AdminCourses: React.FC = () => {
       try {
         // If we're editing an existing course, delete all videos from the database
         if (editingCourse) {
-          console.log(`Clearing all videos from database for course: ${editingCourse._id}`)
+          
           try {
             await deleteExistingCourseStructure(editingCourse._id)
-            console.log('✅ Database videos cleared successfully')
+            
           } catch (dbError: any) {
             console.error('❌ Database deletion failed:', dbError)
             
@@ -775,7 +762,7 @@ const AdminCourses: React.FC = () => {
         if (!editingCourse) {
           toast.success('All videos removed successfully!')
         }
-        console.log('Cleared all videos from local state')
+        
       } catch (error: any) {
         console.error('Error clearing videos:', error)
         toast.error(`Failed to clear videos: ${error.message || 'Unknown error'}`)

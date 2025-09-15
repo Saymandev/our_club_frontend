@@ -351,8 +351,8 @@ const HistoricalMomentDetailPage = () => {
                   style={{ pointerEvents: 'auto' }}
                   onError={(e) => {
                     console.error('Video failed to load:', e)
-                    console.log('Video URL:', mediaFiles[currentImageIndex].mediaUrl)
-                    console.log('Thumbnail URL:', mediaFiles[currentImageIndex].thumbnailUrl)
+                    
+                    
                   }}
                   onClick={(e) => {
                     e.stopPropagation()

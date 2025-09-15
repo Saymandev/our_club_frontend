@@ -81,7 +81,7 @@ const BloodDonorsPage: React.FC = () => {
       setLoading(true)
       
       const response = await bloodDonationApi.getAllDonors(filters)
-      console.log('Donors response:', response.data)
+     
       setDonors(response.data.data)
       setPagination(response.data.pagination)
     } catch (error: any) {

@@ -64,9 +64,9 @@ const CourseDetailPage: React.FC = () => {
         const courseResponse = await coursesApi.getById(id!)
         courseData = courseResponse.data.data.course
         setCourse(courseData)
-        console.log('Course loaded successfully:', courseData.title)
+        
       } catch (error) {
-        console.log('Failed to load course with getById, trying alternative approach')
+        
         // Try to get course from the list of all courses
         try {
           const allCoursesResponse = await coursesApi.getAll({ isPublished: 'true' })
@@ -75,13 +75,13 @@ const CourseDetailPage: React.FC = () => {
           
           if (courseData) {
             setCourse(courseData)
-            console.log('Course found in all courses:', courseData.title)
+            
           } else {
-            console.log('Course not found in all courses either')
+            
             return // Course not found, will show error message
           }
         } catch (listError) {
-          console.log('Failed to load course from all courses:', listError)
+          
           return // Both methods failed
         }
       }
@@ -103,17 +103,17 @@ const CourseDetailPage: React.FC = () => {
 
   const loadCourseStructure = async (courseId: string) => {
     try {
-      console.log('Loading course structure for:', courseId)
+      
       
       // Get subjects for the course
       const subjectsResponse = await subjectsApi.getByCourse(courseId)
       const subjects = subjectsResponse.data.data || []
       
-      console.log('Subjects found:', subjects.length)
+     
       
       // If no subjects found, that's okay - course might not have structure yet
       if (subjects.length === 0) {
-        console.log('No subjects found for course - this is normal for new courses')
+        
         return []
       }
       
@@ -121,7 +121,7 @@ const CourseDetailPage: React.FC = () => {
       const subjectsWithStructure = []
       
       for (const subject of subjects) {
-        console.log(`Loading chapters for subject:`, subject.title)
+        
         try {
           const chaptersResponse = await chaptersApi.getBySubject(subject._id)
           const chapters = chaptersResponse.data.data || []
@@ -129,7 +129,7 @@ const CourseDetailPage: React.FC = () => {
           const chaptersWithVideos = []
           
           for (const chapter of chapters) {
-            console.log(`Loading videos for chapter:`, chapter.title)
+            
             try {
               const videosResponse = await videosApi.getByChapter(chapter._id)
               const videos = videosResponse.data.data || []
@@ -140,9 +140,9 @@ const CourseDetailPage: React.FC = () => {
                 videos: videos
               }
               chaptersWithVideos.push(chapterWithVideos)
-              console.log(`Added ${videos.length} videos to chapter:`, chapter.title)
+              
             } catch (error) {
-              console.log(`Error loading videos for chapter ${chapter._id}:`, error)
+              
               // Add chapter without videos
               chaptersWithVideos.push({ ...chapter, videos: [] })
             }
@@ -154,15 +154,15 @@ const CourseDetailPage: React.FC = () => {
             chapters: chaptersWithVideos
           }
           subjectsWithStructure.push(subjectWithChapters)
-          console.log(`Added ${chaptersWithVideos.length} chapters to subject:`, subject.title)
+          
         } catch (error) {
-          console.log(`Error loading chapters for subject ${subject._id}:`, error)
+         
           // Add subject without chapters
           subjectsWithStructure.push({ ...subject, chapters: [] })
         }
       }
       
-      console.log(`Loaded ${subjectsWithStructure.length} subjects with structure`)
+      
       return subjectsWithStructure
     } catch (error: any) {
       console.error('Failed to load course structure:', error)
@@ -210,7 +210,7 @@ const CourseDetailPage: React.FC = () => {
     
     try {
       await videosApi.updateProgress(videoId, { watchedDuration })
-      console.log('Video progress updated successfully')
+      
       setLastProgressUpdate(now)
       // Don't refresh entire course data, just log success
     } catch (error) {

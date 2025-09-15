@@ -222,7 +222,7 @@ const AdminEvents = () => {
         images: eventImages // Include images directly in event data
       }
 
-      console.log('Sending event data:', eventData) // Debug log
+      
       
       if (editingEvent) {
         await eventsApi.update(editingEvent._id, eventData)
@@ -239,7 +239,7 @@ const AdminEvents = () => {
       reset()
     } catch (error: any) {
       console.error('Create/Update event error:', error)
-      console.log('Full error response:', error.response) // Additional debugging
+      
       
       if (error.response?.data?.errors) {
         // Handle validation errors

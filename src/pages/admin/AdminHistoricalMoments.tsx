@@ -121,10 +121,10 @@ const AdminHistoricalMoments = () => {
       const responses = await Promise.all(uploadPromises)
       
       // Debug log the responses
-      console.log('Upload responses:', responses)
+     
       
       const newFiles: MediaFile[] = responses.map((response, index) => {
-        console.log(`Processing file ${index + 1}:`, response.data)
+        
         
         // Validate response structure
         if (!response.data || !response.data.data) {
@@ -214,7 +214,7 @@ const AdminHistoricalMoments = () => {
         const newMediaFiles = uploadedFiles || []
         payload.mediaFiles = [...existingMediaFiles, ...newMediaFiles]
         
-        console.log('Editing payload:', payload)
+        
       } else {
         // When creating new moment
         if (uploadedFiles.length > 0) {
@@ -234,8 +234,7 @@ const AdminHistoricalMoments = () => {
           const additionalFiles = uploadedFiles.length > 1 ? uploadedFiles.slice(1) : []
           payload.mediaFiles = additionalFiles
           
-          console.log('Creating new moment payload:', payload)
-          console.log('Uploaded files:', uploadedFiles)
+          
         } else {
           throw new Error('No files were uploaded')
         }
@@ -250,16 +249,14 @@ const AdminHistoricalMoments = () => {
         throw new Error('Missing required media fields')
       }
 
-      console.log('Final payload being sent:', JSON.stringify(payload, null, 2))
+      
 
       if (editingMoment) {
-        const response = await historicalMomentsApi.update(editingMoment._id, payload)
-        console.log('Update response:', response)
+        
+        
         toast.success('Historical moment updated successfully!')
       } else {
-        const response = await historicalMomentsApi.create(payload)
-        console.log('Create response:', response)
-        toast.success('Historical moment created successfully!')
+        
       }
 
       setShowModal(false)
@@ -434,8 +431,7 @@ const AdminHistoricalMoments = () => {
                       poster={moment.thumbnailUrl}
                       onError={(e) => {
                         console.error('Video failed to load:', e)
-                        console.log('Video URL:', moment.mediaUrl)
-                        console.log('Thumbnail URL:', moment.thumbnailUrl)
+                       
                       }}
                     />
                   )}

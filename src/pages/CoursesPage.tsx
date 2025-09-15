@@ -46,7 +46,7 @@ const CoursesPage: React.FC = () => {
             const progress = await getCourseProgress(course._id)
             return { ...course, progress }
           } catch (error) {
-            console.log(`Failed to load progress for course ${course.title}`)
+            
             return { ...course, progress: null }
           }
         })

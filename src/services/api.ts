@@ -14,7 +14,7 @@ const api = axios.create({
 const handleOfflineError = (error: any) => {
   if (!navigator.onLine) {
     // Don't show error toast for offline, just log it
-    console.log('Offline - using cached data if available')
+    
     return Promise.resolve({ data: null, isOffline: true })
   }
   return Promise.reject(error)
@@ -61,7 +61,7 @@ api.interceptors.response.use(
 
     // Handle network errors
     if (error.code === 'NETWORK_ERROR' || error.code === 'ECONNABORTED') {
-      console.log('Network error - may be offline')
+      
       return handleOfflineError(error)
     }
 
