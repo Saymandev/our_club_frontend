@@ -193,9 +193,9 @@ const AdminExams: React.FC = () => {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'quiz': return 'bg-blue-100 text-blue-800'
-      case 'document_submission': return 'bg-purple-100 text-purple-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'quiz': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
+      case 'document_submission': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300'
+      default: return 'bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-300'
     }
   }
 
@@ -207,8 +207,8 @@ const AdminExams: React.FC = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Exam Management</h1>
-          <p className="text-gray-600">Create and manage quizzes and document submission exams</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Exam Management</h1>
+          <p className="text-gray-600 dark:text-gray-400">Create and manage quizzes and document submission exams</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -220,14 +220,14 @@ const AdminExams: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
             <select
               value={filters.type}
               onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="">All Types</option>
               <option value="quiz">Quiz</option>
@@ -235,11 +235,11 @@ const AdminExams: React.FC = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
             <select
               value={filters.isPublished}
               onChange={(e) => setFilters({ ...filters, isPublished: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="">All Status</option>
               <option value="true">Published</option>
@@ -250,38 +250,38 @@ const AdminExams: React.FC = () => {
       </div>
 
       {/* Exams List */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
         {loading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading exams...</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Loading exams...</p>
           </div>
         ) : exams.length === 0 ? (
           <div className="p-8 text-center">
             <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No exams found</p>
+            <p className="text-gray-600 dark:text-gray-400">No exams found</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exam</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questions</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Exam</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Questions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Points</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Start Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                 {exams.map((exam) => (
-                  <tr key={exam._id} className="hover:bg-gray-50">
+                  <tr key={exam._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{exam.title}</div>
-                        <div className="text-sm text-gray-500 truncate max-w-xs">{exam.description}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{exam.title}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">{exam.description}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -289,24 +289,24 @@ const AdminExams: React.FC = () => {
                         {exam.type === 'quiz' ? 'Quiz' : 'Document Submission'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {exam.questions.length}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {exam.totalPoints}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {formatDate(exam.startDate)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {exam.isPublished ? (
-                          <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                          <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                             <Eye className="w-3 h-3 mr-1" />
                             Published
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                          <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-300">
                             <EyeOff className="w-3 h-3 mr-1" />
                             Draft
                           </span>
@@ -317,13 +317,13 @@ const AdminExams: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleEdit(exam)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(exam._id)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -339,29 +339,39 @@ const AdminExams: React.FC = () => {
 
       {/* Exam Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">
-              {editingExam ? 'Edit Exam' : 'Add New Exam'}
-            </h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                {editingExam ? 'Edit Exam' : 'Add New Exam'}
+              </h2>
+              <button
+                onClick={handleCloseModal}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
             
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
                   <input
                     {...register('title', { required: 'Title is required' })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Exam title"
                   />
                   {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type *</label>
                   <select
                     {...register('type', { required: 'Type is required' })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="quiz">Quiz</option>
                     <option value="document_submission">Document Submission</option>
@@ -370,11 +380,11 @@ const AdminExams: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description *</label>
                 <textarea
                   {...register('description', { required: 'Description is required' })}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Exam description"
                 />
                 {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
@@ -382,32 +392,32 @@ const AdminExams: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Passing Score (%) *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Passing Score (%) *</label>
                   <input
                     {...register('passingScore', { required: 'Passing score is required', min: 0, max: 100 })}
                     type="number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="70"
                   />
                   {errors.passingScore && <p className="text-red-500 text-xs mt-1">{errors.passingScore.message}</p>}
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Time Limit (minutes)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Limit (minutes)</label>
                   <input
                     {...register('timeLimit')}
                     type="number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="60"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Attempts Allowed</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Attempts Allowed</label>
                   <input
                     {...register('attemptsAllowed')}
                     type="number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="0 (unlimited)"
                   />
                 </div>
@@ -415,29 +425,29 @@ const AdminExams: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date *</label>
                   <input
                     {...register('startDate', { required: 'Start date is required' })}
                     type="date"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                   {errors.startDate && <p className="text-red-500 text-xs mt-1">{errors.startDate.message}</p>}
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
                   <input
                     {...register('endDate')}
                     type="date"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
 
               {/* Questions Section */}
               <div>
-                <div className="flex justify-between items-center mb-4">
-                  <label className="block text-sm font-medium text-gray-700">Questions</label>
+                <div className="flex justify-between items-center mb-3">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Questions</label>
                   <button
                     type="button"
                     onClick={addQuestion}
@@ -448,13 +458,13 @@ const AdminExams: React.FC = () => {
                 </div>
 
                 {questions.map((question, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4 mb-4">
+                  <div key={index} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 mb-3 bg-gray-50 dark:bg-gray-700">
                     <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-medium">Question {index + 1}</h4>
+                      <h4 className="font-medium text-gray-900 dark:text-white">Question {index + 1}</h4>
                       <button
                         type="button"
                         onClick={() => removeQuestion(index)}
-                        className="text-red-600 hover:text-red-800"
+                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                       >
                         Remove
                       </button>
@@ -462,21 +472,21 @@ const AdminExams: React.FC = () => {
 
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Question Text *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Question Text *</label>
                         <textarea
                           {...register(`questions.${index}.question`, { required: 'Question text is required' })}
                           rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
                           placeholder="Enter question text"
                         />
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type *</label>
                           <select
                             {...register(`questions.${index}.type`, { required: 'Question type is required' })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
                           >
                             <option value="multiple_choice">Multiple Choice</option>
                             <option value="true_false">True/False</option>
@@ -486,11 +496,11 @@ const AdminExams: React.FC = () => {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Points *</label>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Points *</label>
                           <input
                             {...register(`questions.${index}.points`, { required: 'Points are required', min: 1 })}
                             type="number"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
                             placeholder="1"
                           />
                         </div>
@@ -498,10 +508,10 @@ const AdminExams: React.FC = () => {
 
                       {question.type === 'multiple_choice' && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Options (comma-separated)</label>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Options (comma-separated)</label>
                           <input
                             {...register(`questions.${index}.options`)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
                             placeholder="Option 1, Option 2, Option 3"
                           />
                         </div>
@@ -509,10 +519,10 @@ const AdminExams: React.FC = () => {
 
                       {(question.type === 'multiple_choice' || question.type === 'true_false') && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Correct Answer</label>
                           <input
                             {...register(`questions.${index}.correctAnswer`)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
                             placeholder="Correct answer"
                           />
                         </div>
@@ -523,9 +533,9 @@ const AdminExams: React.FC = () => {
                           {...register(`questions.${index}.required`)}
                           type="checkbox"
                           id={`required-${index}`}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-600"
                         />
-                        <label htmlFor={`required-${index}`} className="ml-2 block text-sm text-gray-900">
+                        <label htmlFor={`required-${index}`} className="ml-2 block text-sm text-gray-900 dark:text-white">
                           Required question
                         </label>
                       </div>
@@ -539,18 +549,18 @@ const AdminExams: React.FC = () => {
                   {...register('isPublished')}
                   type="checkbox"
                   id="isPublished"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                 />
-                <label htmlFor="isPublished" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="isPublished" className="ml-2 block text-sm text-gray-900 dark:text-white">
                   Publish this exam
                 </label>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex justify-end gap-3 pt-3 border-t border-gray-200 dark:border-gray-600">
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
                 >
                   Cancel
                 </button>

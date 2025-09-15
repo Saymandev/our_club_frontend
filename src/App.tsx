@@ -18,6 +18,7 @@ import EventDetailPage from '@/pages/EventDetailPage'
 import EventsPage from '@/pages/EventsPage'
 import ExamPage from '@/pages/ExamPage'
 import ExamResultsPage from '@/pages/ExamResultsPage'
+import ExamsPage from '@/pages/ExamsPage'
 import HistoricalMomentDetailPage from '@/pages/HistoricalMomentDetailPage'
 import HistoryPage from '@/pages/HistoryPage'
 import HomePage from '@/pages/HomePage'
@@ -91,6 +92,7 @@ function App() {
           <Route path="donations" element={<DonationsPage />} />
           <Route path="courses" element={<CoursesPage />} />
           <Route path="courses/:id" element={<CourseDetailPage />} />
+          <Route path="exams" element={<ExamsPage />} />
           <Route path="exam/:id" element={<ExamPage />} />
           <Route path="exam-results" element={<ExamResultsPage />} />
         </Route>

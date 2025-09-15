@@ -195,10 +195,10 @@ export const uploadApi = {
     formData.append('file', file)
     if (folder) formData.append('folder', folder)
     
-    // Use longer timeout for uploads (2 minutes for video files)
+    // Use longer timeout for uploads (10 minutes for large video files)
     return api.post('/upload/single', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 120000, // 2 minutes
+      timeout: 600000, // 10 minutes for large video files
     })
   },
   multiple: (files: File[], folder?: string) => {
@@ -579,6 +579,7 @@ export const videosApi = {
   }) => api.post('/videos', data),
   
   update: (id: string, data: any) => api.put(`/videos/${id}`, data),
+  deleteProgress: (id: string) => api.delete(`/videos/${id}/progress`),
   delete: (id: string) => api.delete(`/videos/${id}`),
 }
 

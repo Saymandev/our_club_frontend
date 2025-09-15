@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils/cn'
-import { ChevronDown, Droplets, FileText, Menu, Moon, Settings, Sun, User, X } from 'lucide-react'
+import { BookOpen, Calendar, ChevronDown, Droplets, FileText, Heart, History, Megaphone, Menu, Moon, Settings, Sun, User, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router-dom'
@@ -11,21 +11,42 @@ import LanguageSwitcher from '../UI/LanguageSwitcher'
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const { theme, toggleTheme } = useThemeStore()
   const { isAuthenticated, user } = useAuthStore()
   const location = useLocation()
   const { t } = useTranslation()
   const menuRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const navigation = [
     { name: t('common.home'), href: '/' },
-    { name: t('common.announcements'), href: '/announcements' },
-    { name: t('eventsPage.title'), href: '/events' },
-    { name: t('common.history'), href: '/history' },
-    { name: t('common.bloodDonors'), href: '/blood-donors' },
-    { name: t('common.donations'), href: '/donations' },
-    { name: 'Courses', href: '/courses' },
+    { 
+      name: 'Learning', 
+      href: '#',
+      dropdown: [
+        { name: 'Courses', href: '/courses', icon: BookOpen },
+        { name: 'Exams', href: '/exams', icon: FileText },
+      ]
+    },
+    { 
+      name: 'Community', 
+      href: '#',
+      dropdown: [
+        { name: t('common.announcements'), href: '/announcements', icon: Megaphone },
+        { name: t('eventsPage.title'), href: '/events', icon: Calendar },
+        { name: t('common.history'), href: '/history', icon: History },
+      ]
+    },
+    { 
+      name: 'Health', 
+      href: '#',
+      dropdown: [
+        { name: t('common.bloodDonors'), href: '/blood-donors', icon: Heart },
+        { name: t('common.donations'), href: '/donations', icon: Droplets },
+      ]
+    },
   ]
 
   const isActivePath = (path: string) => {
@@ -40,6 +61,9 @@ const Header = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setIsUserMenuOpen(false)
+      }
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setActiveDropdown(null)
       }
     }
 
@@ -71,20 +95,65 @@ const Header = () => {
           </div>
 
           {/* Desktop Navigation - Show on large screens */}
-          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 2xl:space-x-4">
+          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2 2xl:space-x-4" ref={dropdownRef}>
             {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={cn(
-                  'px-2 py-2 rounded-md text-sm font-medium transition-colors duration-200 whitespace-nowrap',
-                  isActivePath(item.href)
-                    ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
-                    : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
+              <div key={item.name} className="relative">
+                {item.dropdown ? (
+                  <div className="relative">
+                    <button
+                      onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
+                      className={cn(
+                        'px-2 py-2 rounded-md text-sm font-medium transition-colors duration-200 whitespace-nowrap flex items-center gap-1',
+                        activeDropdown === item.name || item.dropdown?.some(subItem => isActivePath(subItem.href))
+                          ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                          : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
+                      )}
+                    >
+                      {item.name}
+                      <ChevronDown className={cn(
+                        'w-3 h-3 transition-transform duration-200',
+                        activeDropdown === item.name ? 'rotate-180' : ''
+                      )} />
+                    </button>
+                    
+                    {activeDropdown === item.name && (
+                      <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+                        {item.dropdown.map((subItem) => {
+                          const IconComponent = subItem.icon
+                          return (
+                            <Link
+                              key={subItem.name}
+                              to={subItem.href}
+                              onClick={() => setActiveDropdown(null)}
+                              className={cn(
+                                'flex items-center px-4 py-2 text-sm transition-colors duration-200',
+                                isActivePath(subItem.href)
+                                  ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                                  : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                              )}
+                            >
+                              <IconComponent className="w-4 h-4 mr-3" />
+                              {subItem.name}
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    to={item.href}
+                    className={cn(
+                      'px-2 py-2 rounded-md text-sm font-medium transition-colors duration-200 whitespace-nowrap',
+                      isActivePath(item.href)
+                        ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                        : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
+                    )}
+                  >
+                    {item.name}
+                  </Link>
                 )}
-              >
-                {item.name}
-              </Link>
+              </div>
             ))}
           </nav>
 
@@ -179,22 +248,52 @@ const Header = () => {
           <div className="lg:hidden py-4 border-t border-gray-200 dark:border-gray-700" ref={menuRef}>
             <nav className="flex flex-col space-y-1">
               {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={cn(
-                    'px-3 py-3 rounded-md text-base font-medium transition-colors duration-200 flex items-center justify-between',
-                    isActivePath(item.href)
-                      ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                <div key={item.name}>
+                  {item.dropdown ? (
+                    <div>
+                      <div className="px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-600">
+                        {item.name}
+                      </div>
+                      <div className="ml-4 space-y-1">
+                        {item.dropdown.map((subItem) => {
+                          const IconComponent = subItem.icon
+                          return (
+                            <Link
+                              key={subItem.name}
+                              to={subItem.href}
+                              onClick={() => setIsMenuOpen(false)}
+                              className={cn(
+                                'flex items-center px-3 py-2 text-sm font-medium transition-colors duration-200 rounded-md',
+                                isActivePath(subItem.href)
+                                  ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                                  : 'text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                              )}
+                            >
+                              <IconComponent className="w-4 h-4 mr-3" />
+                              {subItem.name}
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <Link
+                      to={item.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={cn(
+                        'px-3 py-3 rounded-md text-base font-medium transition-colors duration-200 flex items-center justify-between',
+                        isActivePath(item.href)
+                          ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                          : 'text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      )}
+                    >
+                      <span>{item.name}</span>
+                      {isActivePath(item.href) && (
+                        <div className="w-2 h-2 bg-primary-600 dark:bg-primary-400 rounded-full"></div>
+                      )}
+                    </Link>
                   )}
-                >
-                  <span>{item.name}</span>
-                  {isActivePath(item.href) && (
-                    <div className="w-2 h-2 bg-primary-600 dark:bg-primary-400 rounded-full"></div>
-                  )}
-                </Link>
+                </div>
               ))}
               
               {/* Mobile-only items */}

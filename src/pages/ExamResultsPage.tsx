@@ -61,31 +61,31 @@ const ExamResultsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <Link to="/courses" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4">
+          <Link to="/courses" className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Courses
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">My Exam Results</h1>
-          <p className="text-gray-600 mt-2">View your exam performance and scores</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Exam Results</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">View your exam performance and scores</p>
         </div>
 
         {/* Results */}
         {results.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-12 text-center">
             <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No exam results found</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No exam results found</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
               You haven't taken any exams yet. Start learning and take your first exam!
             </p>
             <Link
@@ -98,13 +98,13 @@ const ExamResultsPage: React.FC = () => {
         ) : (
           <div className="space-y-6">
             {results.map((result) => (
-              <div key={result._id} className="bg-white rounded-lg shadow-sm p-6">
+              <div key={result._id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                       {result.examId.title}
                     </h3>
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center gap-1">
                         <FileText className="w-4 h-4" />
                         <span>
@@ -141,21 +141,21 @@ const ExamResultsPage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="text-sm text-gray-600 mb-1">Score</div>
-                    <div className="text-lg font-semibold text-gray-900">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Score</div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
                       {result.totalScore} / {result.examId.totalPoints}
                     </div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="text-sm text-gray-600 mb-1">Time Spent</div>
-                    <div className="text-lg font-semibold text-gray-900">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Time Spent</div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
                       {formatTime(result.timeSpent)}
                     </div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="text-sm text-gray-600 mb-1">Passing Score</div>
-                    <div className="text-lg font-semibold text-gray-900">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Passing Score</div>
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
                       {result.examId.passingScore}%
                     </div>
                   </div>
@@ -163,11 +163,11 @@ const ExamResultsPage: React.FC = () => {
 
                 {/* Progress Bar */}
                 <div className="mb-4">
-                  <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
                     <span>Your Score</span>
                     <span>{result.percentage}%</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div
                       className={`h-2 rounded-full transition-all duration-300 ${
                         result.passed ? 'bg-green-600' : 'bg-red-600'
