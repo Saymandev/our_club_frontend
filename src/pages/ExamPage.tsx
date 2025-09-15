@@ -47,18 +47,26 @@ const ExamPage: React.FC = () => {
     try {
       setLoading(true)
       const response = await examsApi.getById(id!)
-      setExam(response.data.data)
+      const { exam: examData, userAttempts, lastResult } = response.data.data
+      
+      // Combine exam data with user-specific data
+      const examWithUserData = {
+        ...examData,
+        userAttempts,
+        lastResult
+      }
+      setExam(examWithUserData)
       
       // Initialize answers array
-      const initialAnswers = response.data.data.exam.questions.map((q: any) => ({
+      const initialAnswers = examData.questions.map((q: any) => ({
         questionId: q._id,
         answer: q.type === 'multiple_choice' ? [] : ''
       }))
       setAnswers(initialAnswers)
 
       // Set up timer if exam has time limit
-      if (response.data.data.exam.timeLimit > 0) {
-        setTimeRemaining(response.data.data.exam.timeLimit * 60) // Convert minutes to seconds
+      if (examData.timeLimit > 0) {
+        setTimeRemaining(examData.timeLimit * 60) // Convert minutes to seconds
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to load exam')
@@ -111,7 +119,7 @@ const ExamPage: React.FC = () => {
       setSubmitting(true)
       
       // Validate required questions
-      const requiredQuestions = exam.questions.filter(q => q.required)
+      const requiredQuestions = exam.questions?.filter(q => q.required) || []
       const missingAnswers = requiredQuestions.filter(q => {
         const answer = answers.find(a => a.questionId === q._id)
         return !answer || !answer.answer || 
@@ -232,7 +240,7 @@ const ExamPage: React.FC = () => {
                 </div>
               )}
               <div className="text-sm text-gray-500">
-                {exam.questions.length} questions • {exam.totalPoints} points
+                {exam.questions?.length || 0} questions • {exam.totalPoints} points
               </div>
             </div>
           </div>
@@ -251,7 +259,7 @@ const ExamPage: React.FC = () => {
 
         {/* Questions */}
         <div className="space-y-4 sm:space-y-6">
-          {exam.questions.map((question, index) => (
+          {exam.questions?.map((question, index) => (
             <div key={question._id} className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
               <div className="flex items-start gap-3 sm:gap-4">
                 <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base">
