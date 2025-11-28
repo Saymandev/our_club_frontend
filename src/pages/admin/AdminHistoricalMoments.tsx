@@ -249,14 +249,13 @@ const AdminHistoricalMoments = () => {
         throw new Error('Missing required media fields')
       }
 
-      
-
+      // Make API call
       if (editingMoment) {
-        
-        
+        await historicalMomentsApi.update(editingMoment._id, payload)
         toast.success('Historical moment updated successfully!')
       } else {
-        
+        await historicalMomentsApi.create(payload)
+        toast.success('Historical moment created successfully!')
       }
 
       setShowModal(false)
