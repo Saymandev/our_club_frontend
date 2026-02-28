@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils/cn'
-import { BookOpen, Calendar, ChevronDown, Droplets, FileText, Heart, History, Megaphone, Menu, Moon, Settings, Sun, User, X } from 'lucide-react'
+import { BookOpen, Calendar, ChevronDown, Droplets, FileText, Gavel, Heart, History, Megaphone, Menu, Moon, Settings, Sun, Trophy, User, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router-dom'
@@ -45,6 +45,14 @@ const Header = () => {
       dropdown: [
         { name: t('common.bloodDonors'), href: '/blood-donors', icon: Heart },
         { name: t('common.donations'), href: '/donations', icon: Droplets },
+      ]
+    },
+    { 
+      name: 'Cricket', 
+      href: '#',
+      dropdown: [
+        { name: 'Live Auction', href: '/auction', icon: Gavel },
+        { name: 'Tournaments', href: '/tournaments', icon: Trophy },
       ]
     },
   ]
