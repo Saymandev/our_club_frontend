@@ -7,6 +7,11 @@ const LiveScoringPage: React.FC = () => {
   const [match, setMatch] = useState<any>(null);
   const [runs, setRuns] = useState<number>(0);
   const [extra, setExtra] = useState<string>('None');
+  
+  // Selection States
+  const [striker, setStriker] = useState<string>('');
+  const [nonStriker, setNonStriker] = useState<string>('');
+  const [bowler, setBowler] = useState<string>('');
 
   useEffect(() => {
     const fetchMatch = async () => {
@@ -21,24 +26,41 @@ const LiveScoringPage: React.FC = () => {
     fetchMatch();
   }, [id]);
 
+  useEffect(() => {
+    if (match) {
+        // Default selections if not set
+        if (!striker && match.team1.squad.length > 0) setStriker(match.team1.squad[0]._id);
+        if (!nonStriker && match.team1.squad.length > 1) setNonStriker(match.team1.squad[1]._id);
+        if (!bowler && match.team2.squad.length > 0) setBowler(match.team2.squad[0]._id);
+    }
+  }, [match]);
+
   const handleBallSubmit = async (wicket: boolean = false) => {
-    if (!match) return;
+    if (!match || !striker || !nonStriker || !bowler) return;
     try {
-      await cricketApi.addBall({
+      const res = await cricketApi.addBall({
         matchId: match._id,
-        inningsNo: match.status === 'Live' ? 1 : 1, // Logic depends on current innings
-        over: 0, // Should be calculated
-        ball: 0, // Should be calculated
-        striker: match.team1.squad[0], // Simplified
-        nonStriker: match.team1.squad[1],
-        bowler: match.team2.squad[0],
+        inningsNo: match.status === 'Live' ? 1 : 2, 
+        striker,
+        nonStriker,
+        bowler,
         runs,
         extras: { type: extra, runs: extra !== 'None' ? 1 : 0 },
-        wicket: wicket ? { type: 'Bowled', player: match.team1.squad[0] } : undefined
+        wicket: wicket ? { type: 'Bowled', player: striker } : undefined
       });
-      // Refresh match data
-      const res = await cricketApi.getMatchById(match._id);
-      setMatch(res.data);
+      
+      // Update match data
+      setMatch(res.data.match);
+      
+      // Auto-rotation from backend suggestion
+      if (res.data.nextState) {
+          setStriker(res.data.nextState.striker);
+          setNonStriker(res.data.nextState.nonStriker);
+      }
+      
+      // Reset runs for next ball
+      setRuns(0);
+      setExtra('None');
     } catch (err) {
       console.error('Error submitting ball:', err);
     }
@@ -59,8 +81,43 @@ const LiveScoringPage: React.FC = () => {
             <div className="px-4 text-xl font-bold text-slate-300 italic">VS</div>
             <div className="text-center flex-1 text-slate-400">
               <p className="text-sm font-bold uppercase tracking-widest mb-2">{match.team2.name}</p>
-              <h2 className="text-4xl font-black">Yet to Bat</h2>
+              <h2 className="text-4xl font-black">
+                {match.innings[1] ? `${match.innings[1].runs} / ${match.innings[1].wickets}` : 'Yet to Bat'}
+              </h2>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-8">
+              <div>
+                  <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">On Strike</label>
+                  <select 
+                    value={striker} 
+                    onChange={e => setStriker(e.target.value)}
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-sm font-bold"
+                  >
+                      {match.team1.squad.map((p: any) => <option key={p._id} value={p._id}>{p.name}</option>)}
+                  </select>
+              </div>
+              <div>
+                  <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Non-Strike</label>
+                  <select 
+                    value={nonStriker} 
+                    onChange={e => setNonStriker(e.target.value)}
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-sm font-bold"
+                  >
+                      {match.team1.squad.map((p: any) => <option key={p._id} value={p._id}>{p.name}</option>)}
+                  </select>
+              </div>
+              <div className="col-span-2">
+                  <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Bowler</label>
+                  <select 
+                    value={bowler} 
+                    onChange={e => setBowler(e.target.value)}
+                    className="w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-sm font-bold"
+                  >
+                      {match.team2.squad.map((p: any) => <option key={p._id} value={p._id}>{p.name}</option>)}
+                  </select>
+              </div>
           </div>
 
           <div className="grid grid-cols-4 gap-4 mb-8">

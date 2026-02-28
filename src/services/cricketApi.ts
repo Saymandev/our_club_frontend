@@ -10,15 +10,19 @@ const api = axios.create({
 // Players
 export const getPlayers = (params?: any) => api.get('/players', { params });
 export const getPlayerById = (id: string) => api.get(`/players/${id}`);
+export const createPlayer = (data: any) => api.post('/players', data);
+export const deletePlayer = (id: string) => api.delete(`/players/${id}`);
 
 // Teams
 export const getTeams = () => api.get('/teams');
 export const getTeamById = (id: string) => api.get(`/teams/${id}`);
+export const createTeam = (data: any) => api.post('/teams', data);
 
 // Tournaments
 export const getTournaments = () => api.get('/tournaments');
 export const getTournamentById = (id: string) => api.get(`/tournaments/${id}`);
 export const getPointsTable = (id: string) => api.get(`/tournaments/${id}/points-table`);
+export const createTournament = (data: any) => api.post('/tournaments', data);
 
 // Matches
 export const getMatches = (params?: any) => api.get('/matches', { params });
@@ -58,4 +62,8 @@ export default {
   adminApproveTeamOwner,
   adminScheduleMatch,
   adminPublishTournament,
+  createPlayer,
+  deletePlayer,
+  createTeam,
+  createTournament,
 };
