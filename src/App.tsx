@@ -10,6 +10,7 @@ import Layout from '@/components/Layout/Layout'
 // Public Pages
 import AnnouncementDetailPage from '@/pages/AnnouncementDetailPage'
 import AnnouncementsPage from '@/pages/AnnouncementsPage'
+import AuctionPage from '@/pages/AuctionPage'
 import BloodDonorsPage from '@/pages/BloodDonorsPage'
 import CourseDetailPage from '@/pages/CourseDetailPage'
 import CoursesPage from '@/pages/CoursesPage'
@@ -22,15 +23,19 @@ import ExamsPage from '@/pages/ExamsPage'
 import HistoricalMomentDetailPage from '@/pages/HistoricalMomentDetailPage'
 import HistoryPage from '@/pages/HistoryPage'
 import HomePage from '@/pages/HomePage'
+import LiveScoringPage from '@/pages/LiveScoringPage'
 import LoginPage from '@/pages/LoginPage'
 import MyBloodDonationPage from '@/pages/MyBloodDonationPage'
+import PointsTablePage from '@/pages/PointsTablePage'
 import RegisterPage from '@/pages/RegisterPage'
+import TournamentPage from '@/pages/TournamentPage'
 
 // Admin Pages
 import AdminAnnouncements from '@/pages/admin/AdminAnnouncements'
 import AdminBloodDonation from '@/pages/admin/AdminBloodDonation'
 import AdminBloodInstitutes from '@/pages/admin/AdminBloodInstitutes'
 import AdminCourses from '@/pages/admin/AdminCourses'
+import AdminCricketDashboard from '@/pages/admin/AdminCricketDashboard'
 import AdminDashboard from '@/pages/admin/AdminDashboard'
 import AdminDonations from '@/pages/admin/AdminDonations'
 import AdminEvents from '@/pages/admin/AdminEvents'
@@ -95,6 +100,10 @@ function App() {
           <Route path="exams" element={<ExamsPage />} />
           <Route path="exam/:id" element={<ExamPage />} />
           <Route path="exam-results" element={<ExamResultsPage />} />
+          <Route path="auction" element={<AuctionPage />} />
+          <Route path="tournaments" element={<TournamentPage />} />
+          <Route path="tournaments/:id/points-table" element={<PointsTablePage />} />
+          <Route path="match/:id/score" element={<LiveScoringPage />} />
         </Route>
 
         {/* Auth Routes */}
@@ -132,6 +141,7 @@ function App() {
           <Route path="exams" element={<AdminExams />} />
           <Route path="donations" element={<AdminDonations />} />
           <Route path="payment-verification" element={<AdminPaymentVerification />} />
+          <Route path="cricket" element={<AdminCricketDashboard />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
