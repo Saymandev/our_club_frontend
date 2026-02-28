@@ -2,25 +2,26 @@ import { useAuthStore } from '@/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils/cn'
 import {
-  BookOpen,
-  Building2,
-  Calendar,
-  Camera,
-  CreditCard,
-  Droplets,
-  FileText,
-  Heart,
-  Home,
-  ImageIcon,
-  LogOut,
-  Megaphone,
-  Menu,
-  Moon,
-  Settings,
-  Sun,
-  User,
-  Users,
-  X
+    BookOpen,
+    Building2,
+    Calendar,
+    Camera,
+    CreditCard,
+    Droplets,
+    FileText,
+    Heart,
+    Home,
+    ImageIcon,
+    LogOut,
+    Megaphone,
+    Menu,
+    Moon,
+    Settings,
+    Sun,
+    Trophy,
+    User,
+    Users,
+    X
 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -49,6 +50,7 @@ const AdminLayout = () => {
     { name: 'Exam Management', href: '/admin/exams', icon: FileText, roles: ['admin', 'moderator'] },
     { name: 'Donation Settings', href: '/admin/donations', icon: Heart, roles: ['admin'] },
     { name: 'Payment Verification', href: '/admin/payment-verification', icon: CreditCard, roles: ['admin'] },
+    { name: 'Cricket Management', href: '/admin/cricket', icon: Trophy, roles: ['admin', 'moderator'] },
     { name: 'Settings', href: '/admin/settings', icon: Settings, roles: ['admin'] },
   ]
 
