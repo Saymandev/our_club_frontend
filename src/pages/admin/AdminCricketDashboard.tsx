@@ -21,7 +21,7 @@ const AdminCricketDashboard: React.FC = () => {
   const [showAddTournament, setShowAddTournament] = useState(false);
   const [newPoll, setNewPoll] = useState({ match: '', question: '', options: ['', ''] });
   const [newPlayer, setNewPlayer] = useState({ 
-    name: '', role: 'Batsman', basePrice: 0, 
+    name: '', role: 'Batsman', basePrice: 0, team: '',
     photoUrl: '', phone: '', email: '', 
     battingStyle: '', bowlingStyle: '',
     injuryStatus: 'Fit', injuryNote: ''
@@ -113,7 +113,7 @@ const AdminCricketDashboard: React.FC = () => {
         await cricketApi.createPlayer(newPlayer);
         setShowAddPlayer(false);
         setNewPlayer({ 
-            name: '', role: 'Batsman', basePrice: 0, 
+            name: '', role: 'Batsman', basePrice: 0, team: '',
             photoUrl: '', phone: '', email: '', 
             battingStyle: '', bowlingStyle: '',
             injuryStatus: 'Fit', injuryNote: ''
