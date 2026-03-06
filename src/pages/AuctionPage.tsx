@@ -97,19 +97,19 @@ const AuctionPage: React.FC = () => {
                     auction.highestBid?.bidder?._id !== myTeam._id &&
                     auction.highestBid?.amount > 0;
 
-  if (!auction) return <div className="p-8 text-center text-white">No active auction found.</div>;
+  if (!auction) return <div className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest animate-pulse">No active auction found.</div>;
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white p-4 md:p-8 font-sans transition-colors duration-300">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <header className="flex flex-col md:flex-row justify-between items-center bg-slate-800/50 backdrop-blur-md p-6 rounded-2xl border border-slate-700 shadow-2xl">
+        <header className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-slate-800/50 backdrop-blur-md p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl transition-colors">
           <div className="flex items-center space-x-4">
             <div className="bg-indigo-600 p-3 rounded-xl shadow-lg shadow-indigo-500/20">
               <Gavel className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent italic uppercase tracking-tighter">UBPL Auction</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent italic uppercase tracking-tighter">UBPL Auction</h1>
               <p className="text-slate-400 text-sm font-medium">Live Player Biddings • Season 2026</p>
             </div>
           </div>
@@ -122,7 +122,7 @@ const AuctionPage: React.FC = () => {
               </div>
             </div>
             {/* Timer for quick view */}
-            <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-700">
+            <div className="p-3 bg-white dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
                <p className="text-[10px] text-slate-500 font-black uppercase">Timer</p>
                <p className="text-xl font-black italic text-red-500 tabular-nums">{auction.timer}s</p>
             </div>
@@ -142,12 +142,12 @@ const AuctionPage: React.FC = () => {
                   <PlayerProfileCard player={auction.currentPlayer} />
                   
                   {/* Bidding Console */}
-                  <div className="bg-slate-800/50 backdrop-blur-md p-8 rounded-3xl border border-slate-700 shadow-xl">
+                  <div className="bg-white dark:bg-slate-800/50 backdrop-blur-md p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl transition-colors">
                     <div className="flex justify-between items-end mb-6">
                        <h3 className="text-lg font-bold uppercase tracking-tighter italic">Bidding Console</h3>
                        <div className="text-right">
                           <p className="text-[10px] text-slate-500 font-bold uppercase">Current Price</p>
-                          <p className="text-3xl font-black italic text-white">৳{auction.highestBid?.amount || auction.currentPlayer?.basePrice}L</p>
+                          <p className="text-3xl font-black italic text-indigo-600 dark:text-white">৳{auction.highestBid?.amount || auction.currentPlayer?.basePrice}L</p>
                        </div>
                     </div>
                     
@@ -156,7 +156,7 @@ const AuctionPage: React.FC = () => {
                         <button
                           key={inc}
                           onClick={() => handleBid((auction.highestBid?.amount || auction.currentPlayer?.basePrice) + inc)}
-                          className="flex-1 min-w-[100px] bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded-xl border border-slate-600 hover:border-indigo-500/50 transition-all active:scale-95 text-lg"
+                          className="flex-1 min-w-[100px] bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-bold py-4 rounded-xl border border-slate-200 dark:border-slate-600 hover:border-indigo-500/50 transition-all active:scale-95 text-lg"
                         >
                           +৳{inc}L
                         </button>
@@ -183,7 +183,7 @@ const AuctionPage: React.FC = () => {
             </AnimatePresence>
 
             {/* Auction History */}
-            <div className="bg-slate-800/40 rounded-3xl border border-slate-700/50 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm transition-colors">
                <div className="p-6 border-b border-slate-700 flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <HistoryIcon className="w-5 h-5 text-indigo-400" />
@@ -203,9 +203,9 @@ const AuctionPage: React.FC = () => {
                    <tbody className="text-sm divide-y divide-slate-700/50">
                      {auction.history?.map((entry: any, i: number) => (
                        <tr key={i} className="group">
-                         <td className="py-4 font-bold text-slate-200">{entry.player?.name}</td>
-                         <td className="py-4 text-slate-400 font-medium">{entry.soldTo?.name || '-'}</td>
-                         <td className="py-4 font-black italic text-indigo-300">৳{entry.price}L</td>
+                         <td className="py-4 font-bold text-slate-800 dark:text-slate-200">{entry.player?.name}</td>
+                         <td className="py-4 text-slate-500 dark:text-slate-400 font-medium">{entry.soldTo?.name || '-'}</td>
+                         <td className="py-4 font-black italic text-indigo-600 dark:text-indigo-300">৳{entry.price}L</td>
                          <td className="py-4 text-right">
                            <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-md ${entry.status === 'Sold' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
                              {entry.status}
@@ -221,7 +221,7 @@ const AuctionPage: React.FC = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-4 space-y-8">
-            <div className="bg-slate-800/40 rounded-3xl border border-slate-700/50 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800/40 rounded-3xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm transition-colors">
                <div className="p-6 border-b border-slate-700 flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Trophy className="w-5 h-5 text-yellow-500" />
@@ -230,10 +230,10 @@ const AuctionPage: React.FC = () => {
                </div>
                <div className="p-6 space-y-4">
                  {teams.map((team: any) => (
-                   <div key={team._id} className="p-4 bg-slate-900/50 rounded-2xl border border-slate-700/50 flex justify-between items-center group hover:border-indigo-500/30 transition-all">
+                   <div key={team._id} className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-700/50 flex justify-between items-center group hover:border-indigo-500/30 transition-all">
                      <div className="flex items-center space-x-3">
-                       <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center font-black text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors text-xs">
-                         {team.shortName[0]}
+                       <div className="w-10 h-10 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center font-black text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors text-xs border border-slate-100 dark:border-slate-700">
+                         {team.shortName?.[0] || '?'}
                        </div>
                        <div>
                          <p className="font-bold text-sm tracking-tight">{team.name}</p>
@@ -241,7 +241,7 @@ const AuctionPage: React.FC = () => {
                        </div>
                      </div>
                      <div className="text-right">
-                       <p className="text-lg font-black italic tabular-nums text-white">৳{team.purseRemaining}L</p>
+                       <p className="text-lg font-black italic tabular-nums text-slate-900 dark:text-white">৳{team.purseRemaining}L</p>
                        <p className="text-[10px] text-slate-500 font-bold uppercase">Remaining</p>
                      </div>
                    </div>

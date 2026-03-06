@@ -26,7 +26,7 @@ const PointsTablePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <header className="mb-10 text-center">
             <div className="inline-block p-4 bg-indigo-600 rounded-3xl shadow-2xl shadow-indigo-500/20 mb-6">
                 <Trophy className="w-10 h-10 text-white" />
@@ -62,7 +62,7 @@ const PointsTablePage: React.FC = () => {
                     <td className="p-6">
                         <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center font-black text-indigo-600">
-                                {row.teamName[0]}
+                                {row.teamName?.charAt(0) || '?'}
                             </div>
                             <span className="font-bold text-gray-900 dark:text-white uppercase tracking-tight">{row.teamName}</span>
                         </div>

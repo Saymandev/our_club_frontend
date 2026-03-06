@@ -32,7 +32,7 @@ const TournamentMatchesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <Link to="/tournaments" className="inline-flex items-center text-slate-400 hover:text-indigo-600 mb-8 transition-colors font-bold text-xs uppercase tracking-widest">
             <ChevronLeft className="w-4 h-4 mr-1" /> Back to Tournaments
         </Link>

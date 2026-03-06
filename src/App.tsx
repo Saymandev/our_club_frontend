@@ -106,9 +106,11 @@ function App() {
           <Route path="exam-results" element={<ExamResultsPage />} />
           <Route path="auction" element={<AuctionPage />} />
           <Route path="player/:id" element={<PlayerProfilePage />} />
-          <Route path="tournaments" element={<TournamentPage />} />
-          <Route path="tournaments/:id/matches" element={<TournamentMatchesPage />} />
-          <Route path="tournaments/:id/points-table" element={<PointsTablePage />} />
+          <Route path="tournaments">
+            <Route index element={<TournamentPage />} />
+            <Route path=":id/matches" element={<TournamentMatchesPage />} />
+            <Route path=":id/points-table" element={<PointsTablePage />} />
+          </Route>
           <Route path="match/:id/score" element={<LiveScoringPage />} />
         </Route>
 
