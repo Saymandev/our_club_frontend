@@ -118,7 +118,7 @@ CLOUDINARY_API_KEY=your-cloudinary-api-key
 CLOUDINARY_API_SECRET=your-cloudinary-api-secret
 
 # Frontend URL for CORS
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=https://adharealorprojonmo.vercel.app
 ```
 
 #### Start the Backend Server
@@ -126,7 +126,7 @@ FRONTEND_URL=http://localhost:3000
 npm run dev
 ```
 
-The backend server will start on `http://localhost:5000`
+The backend server will start on `http://localhost:5001`
 
 ### 3. Frontend Setup
 
@@ -140,7 +140,7 @@ npm install
 Create a `.env` file in the frontend directory for custom API URL:
 
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=https://api.zahid-admission.com/api
 ```
 
 #### Start the Frontend Development Server
@@ -148,7 +148,7 @@ VITE_API_URL=http://localhost:5000/api
 npm run dev
 ```
 
-The frontend will start on `http://localhost:3000`
+The frontend will start on `https://adharealorprojonmo.vercel.app`
 
 ### 4. Database Setup
 
@@ -163,7 +163,7 @@ Use the registration endpoint or MongoDB directly to create your first admin use
 
 ```bash
 # Using the API
-curl -X POST http://localhost:5000/api/auth/register \
+curl -X POST https://api.zahid-admission.com/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin",

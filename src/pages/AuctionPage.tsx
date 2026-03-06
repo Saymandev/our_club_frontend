@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/authStore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Gavel, History as HistoryIcon, TrendingUp, Trophy } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { io, Socket } from 'socket.io-client';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5001';
@@ -54,7 +55,7 @@ const AuctionPage: React.FC = () => {
     // Check if user is an owner of a team
     const myTeam = teams.find(t => t.owner === user.id);
     if (!myTeam) {
-        alert("You must be a team owner to place a bid!");
+        toast.error("You must be a team owner to place a bid!");
         return;
     }
 
@@ -68,6 +69,33 @@ const AuctionPage: React.FC = () => {
       console.error('Bid failed:', err);
     }
   };
+
+  const handleRTM = async () => {
+    if (!socket || !auction || !user) return;
+    
+    const myTeam = teams.find(t => t.owner === user.id);
+    if (!myTeam) {
+        toast.error("You must be a team owner to exercise RTM!");
+        return;
+    }
+
+    try {
+      await cricketApi.exerciseRTM({
+        auctionId: auction._id,
+        teamId: myTeam._id
+      });
+      toast.success("RTM Exercised Successfully!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'RTM failed');
+    }
+  };
+
+  const myTeam = user ? teams.find(t => t.owner === user.id) : null;
+  const canUseRTM = myTeam && 
+                    myTeam.rtmCardsRemaining > 0 && 
+                    myTeam.previousPlayers?.includes(auction.currentPlayer?._id) &&
+                    auction.highestBid?.bidder?._id !== myTeam._id &&
+                    auction.highestBid?.amount > 0;
 
   if (!auction) return <div className="p-8 text-center text-white">No active auction found.</div>;
 
@@ -134,6 +162,15 @@ const AuctionPage: React.FC = () => {
                         </button>
                       ))}
                     </div>
+
+                    {canUseRTM && (
+                        <button
+                          onClick={handleRTM}
+                          className="w-full mb-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black py-4 rounded-xl border border-purple-500 shadow-lg shadow-purple-500/20 transition-all active:scale-95 text-lg uppercase tracking-widest"
+                        >
+                          Exercise RTM (৳{auction.highestBid?.amount}L)
+                        </button>
+                    )}
                     <div className="flex items-center p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
                       <TrendingUp className="w-5 h-5 text-yellow-500 mr-3" />
                       <p className="text-yellow-200/80 text-sm italic font-medium">
@@ -200,7 +237,7 @@ const AuctionPage: React.FC = () => {
                        </div>
                        <div>
                          <p className="font-bold text-sm tracking-tight">{team.name}</p>
-                         <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{team.squad?.length || 0} Players</p>
+                         <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{team.squad?.length || 0} Players • {team.rtmCardsRemaining ?? 0} RTM</p>
                        </div>
                      </div>
                      <div className="text-right">

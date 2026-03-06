@@ -1,7 +1,7 @@
 import api, { authApi } from '@/services/api'
 import toast from 'react-hot-toast'
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
 
 export interface User {
   id: string
@@ -18,6 +18,7 @@ export interface User {
   lastDonationDate?: string
   daysSinceLastDonation?: number | null
   isAvailableForDonation?: boolean
+  clubCoins?: number
 }
 
 interface AuthState {
@@ -201,7 +202,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      getStorage: () => localStorage,
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
         token: state.token,

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router-dom'
 import logo from '../../assests/logo.jpg'
+import CoinBalance from '../Currency/CoinBalance'
 import LanguageSwitcher from '../UI/LanguageSwitcher'
 
 const Header = () => {
@@ -186,6 +187,11 @@ const Header = () => {
             </button>
 
             {/* User Menu - Show on medium screens and up */}
+            {isAuthenticated && user && (
+              <div className="hidden md:block">
+                <CoinBalance balance={user.clubCoins || 0} />
+              </div>
+            )}
             {isAuthenticated && user ? (
               <div className="relative hidden md:block" ref={userMenuRef}>
                 <button

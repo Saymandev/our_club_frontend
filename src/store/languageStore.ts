@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import i18n from '../i18n/config'
 
 export type Language = 'en' | 'bn'
@@ -44,7 +44,7 @@ export const useLanguageStore = create<LanguageState>()(
     }),
     {
       name: 'language-storage',
-      getStorage: () => localStorage,
+      storage: createJSONStorage(() => localStorage),
     }
   )
 ) 

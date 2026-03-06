@@ -26,8 +26,10 @@ import HomePage from '@/pages/HomePage'
 import LiveScoringPage from '@/pages/LiveScoringPage'
 import LoginPage from '@/pages/LoginPage'
 import MyBloodDonationPage from '@/pages/MyBloodDonationPage'
+import PlayerProfilePage from '@/pages/PlayerProfilePage'
 import PointsTablePage from '@/pages/PointsTablePage'
 import RegisterPage from '@/pages/RegisterPage'
+import TournamentMatchesPage from '@/pages/TournamentMatchesPage'
 import TournamentPage from '@/pages/TournamentPage'
 
 // Admin Pages
@@ -45,6 +47,8 @@ import AdminPaymentVerification from '@/pages/admin/AdminPaymentVerification'
 import AdminSettings from '@/pages/admin/AdminSettings'
 import AdminSlider from '@/pages/admin/AdminSlider'
 import AdminUsers from '@/pages/admin/AdminUsers'
+import StrategyBoard from '@/pages/admin/StrategyBoard'
+import TeamOwnerDashboard from '@/pages/admin/TeamOwnerDashboard'
 
 // Components
 import ProtectedRoute from '@/components/Auth/ProtectedRoute'
@@ -101,7 +105,9 @@ function App() {
           <Route path="exam/:id" element={<ExamPage />} />
           <Route path="exam-results" element={<ExamResultsPage />} />
           <Route path="auction" element={<AuctionPage />} />
+          <Route path="player/:id" element={<PlayerProfilePage />} />
           <Route path="tournaments" element={<TournamentPage />} />
+          <Route path="tournaments/:id/matches" element={<TournamentMatchesPage />} />
           <Route path="tournaments/:id/points-table" element={<PointsTablePage />} />
           <Route path="match/:id/score" element={<LiveScoringPage />} />
         </Route>
@@ -142,6 +148,8 @@ function App() {
           <Route path="donations" element={<AdminDonations />} />
           <Route path="payment-verification" element={<AdminPaymentVerification />} />
           <Route path="cricket" element={<AdminCricketDashboard />} />
+          <Route path="owner" element={<TeamOwnerDashboard />} />
+          <Route path="strategy/:matchId" element={<StrategyBoard />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
